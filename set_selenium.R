@@ -43,7 +43,7 @@ webElem$clickElement()
 webElem <- remDr$findElement(using="id", value = "email")
 webElem$sendKeysToElement(list("kouji0925@hotmail.com"))
 webElem <- remDr$findElement(using="id", value = "password")
-webElem$sendKeysToElement(list("N@tsumi21"))
+webElem$sendKeysToElement(list("N@tsumi21"))#####
 webElem <- remDr$findElement(using="id", value = "signInImageEnabled")
 webElem$clickElement()
 

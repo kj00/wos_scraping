@@ -3,9 +3,12 @@
 library(mailR)
 
 #input mail setting
-sender <- "<kzfcv99@gmail.com>"
+sender <- "<kzfcv9@gmail.com>"
 username <- "kzfcv9"
-mailpass <- "sebangou22"
+
+#----
+mailpass <- "sebangou22"  
+#-----
 
 recipient <- "<kojih9@gmail.com>"  ## should be within Gmail
 

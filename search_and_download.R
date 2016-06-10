@@ -1,9 +1,12 @@
-##
-library(stringr)
-
-
 ###Loop for seaching firm names
 
+##library
+library(stringr)
+
+##inputvalues
+dldirect <- "C:/Users/Koji/Downloads/"
+
+##start loop
 for (i in startloop:length(firm)) {
  
   ##return base url
@@ -116,11 +119,11 @@ for (i in startloop:length(firm)) {
     webElem = remDr$findElement(using="class", value = "quickoutput-action")
     webElem$clickElement()
     
-    while (file.exists("C:/Users/Koji/Downloads/savedrecs.txt")==F) { } #wait downloading
+    while (file.exists(paste(dldirect, "savedrecs.txt", sep = ""))==F) { } #wait downloading
     
     
-    file.rename(from = "C:/Users/Koji/Downloads/savedrecs.txt", ##change file name
-      to = paste("C:/Users/Koji/Downloads/wos_", i, "_", j, ".txt", sep=""))
+    file.rename(from = paste(dldirect, "savedrecs.txt", sep = ""), ##change file name
+      to = paste(dldirect, "wos_", i, "_", j, ".txt", sep=""))
     
     
     webElem = remDr$findElement(using="class", value = "quickoutput-cancel-action")

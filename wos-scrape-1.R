@@ -32,7 +32,12 @@ baseurl <- remDr$getCurrentUrl()
 ###Loop for seaching firm names
 stime <- Sys.time()
 
-source("search_and_download") 
+tryCatch( {
+  
+  source("search_and_download") 
+  
+  },
+  error = )
 
 etime <- Sys.time()
   

@@ -81,7 +81,7 @@ for (i in startloop:(length(firm) / 2)) {
       histable <- webElem$getElementAttribute("outerHTML")[[1]] #get html of the table
       histable <- data.frame(readHTMLTable(htmlParse(histable))) #parse and read table
       histnum <- as.character(histable[3,1])# number of current search hist
-      papernum <- as.numeric(gsub(",","", histable[3,2])) # number of papers hit
+      papers_num <- as.numeric(gsub(",","", histable[3,2])) # number of papers hit
       histnum <- gsub("[^0-9]", "", histnum) 
       
       
@@ -105,7 +105,7 @@ for (i in startloop:(length(firm) / 2)) {
   
   #### if no paper is hit, go next.
   #=================================
-  if (papernum == 0) {next}
+  if (papers_num == 0) {next}
   #=================================  
   
   
@@ -129,13 +129,6 @@ for (i in startloop:(length(firm) / 2)) {
       webElem$clickElement()
       
       
-      # find total page numbers
-      webElem <- remDr$findElement(using = "xpath", "//span[@id='hitCount.top']")
-      num_papers <- webElem$getElementText()[[1]] %>%
-        str_replace(",", "") %>%
-        as.numeric
-      
-      
       #-----------------------------------------------------------------------------------------------
       error <- 1  
       
@@ -157,7 +150,7 @@ for (i in startloop:(length(firm) / 2)) {
   ##loop for downloading txt files
   
   #input number of downloads
-  num_dl<- ceiling(num_papers / 500)
+  num_dl<- ceiling(papers_num / 500)
   
   
   for (j in 1:num_dl) {
@@ -187,7 +180,7 @@ for (i in startloop:(length(firm) / 2)) {
           webElem = remDr$findElement(using = "id", value = "markFrom")
           webElem$sendKeysToElement(list(paste(500 * j - 499)))
           webElem = remDr$findElement(using = "id", value = "markTo")
-          webElem$sendKeysToElement(list(paste(num_papers)))
+          webElem$sendKeysToElement(list(paste(papers_num)))
           
         }
         

@@ -5,8 +5,8 @@ setwd("C:/Users/Koji/OneDrive/GitHub/wos_scraping")
 source("clearing_firmname.R")
 
 #
-source("set_selenium.R")
-
+source("set_selenium_chrome.R")
+#source("set_selenium_firefox.R")
 
 
 #======
@@ -20,7 +20,7 @@ source("set_selenium.R")
 
 #get base url
 baseurl <- remDr$getCurrentUrl()
-startloop <- 327
+startloop <- 6
 
 
 ###Loop for seaching firm names

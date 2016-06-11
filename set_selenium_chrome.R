@@ -1,17 +1,24 @@
 ###prepare Rselenium drive
 library(RSelenium)
 
+##
 startServer()
+
 remDr <- remoteDriver(remoteServerAddr = "localhost" 
   , port = 4444
   , browserName = "chrome"
 )
 
 
+
+##
 remDr$open()
 
+###timeout setting
 remDr$setTimeout(type = "page load", milliseconds = 60000)
 remDr$setTimeout(type = "implicit", milliseconds = 60000)
+
+
 
 
 #change download option---------------------
@@ -27,6 +34,7 @@ remDr$setTimeout(type = "implicit", milliseconds = 60000)
 ##preparation
 #waseda log-in
 remDr$navigate("http://www.wul.waseda.ac.jp/DOMEST/db_about/isi/wos.html")
+
 remDr$navigate("http://webofknowledge.com/wos")
 
 #Engilish version
@@ -40,12 +48,12 @@ webElem <- remDr$findElement(using="id", value = "signin")
 webElem$clickElement()
 webElem <- remDr$findElement(using="xpath", "//a[@class='subnav-link']")
 webElem$clickElement()
-webElem <- remDr$findElement(using="id", value = "email")
-webElem$sendKeysToElement(list("kouji0925@hotmail.com"))
-webElem <- remDr$findElement(using="id", value = "password")
-webElem$sendKeysToElement(list("N@tsumi21"))#####
-webElem <- remDr$findElement(using="id", value = "signInImageEnabled")
-webElem$clickElement()
+loginmail <- remDr$findElement(using="id", value = "email")
+loginmail$sendKeysToElement(list("kouji0925@hotmail.com"))
+loginpass <- remDr$findElement(using="id", value = "password")
+loginpass$sendKeysToElement(list("N@tsumi21"))#####
+signin <- remDr$findElement(using="id", value = "signInImageEnabled")
+signin$clickElement()
 
 
 #off-campus login

@@ -20,8 +20,8 @@ firm <- gsub("[^[:alnum:][:space:]&]", " ", firm)
 firm <- toupper(firm) 
 
 #input words to exclude "." means one letter.
-remove1 <- c("INC", "LTD", "LIMITED", "AG", "COMPANY", "PLC","P L C", "CO",
-  "CORPORATION", "SA", "S A", "N V", "PARTNERSHIP", "GROUP", "CORP", "THE", "HOLDINGS", "STORE", "STORES", "ALLIANCE", "ALLIANCES") 
+remove1 <- c("INC", "LTD", "LIMITED", "AG", "A G", "COMPANY", "PLC","P L C", "CO", "CV", "C V", "S A B", "DE", "D E",
+  "CORPORATION", "SA", "S A", "N V", "PARTNERSHIP", "GROUP", "CORP", "THE", "HOLDINGS","HOLDING", "STORE", "STORES", "ALLIANCE", "ALLIANCES") 
 
 
 #exclude words

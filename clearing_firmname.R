@@ -4,11 +4,15 @@
 library(data.table)
 
 #read firm data from OSIRIS
-compname <- fread("C:/Users/Koji/OneDrive/Research/wos_data/compname.csv")
+osiris <- fread("C:/Users/Koji/OneDrive/Research/wos_data/osiris_withRD.csv")
+
+
+
 
 ## clean names
-firm <- compname[, c(2, 6, 3), with = F]
-firm <- cbind(firm[[1]], firm[[2]])
+osiris <- (osiris[, 2:4, with = F])
+
+firm <- cbind(osiris[[2]], osiris[[3]])
 
 #exclude signs except "&"
 firm <- gsub("[^[:alnum:][:space:]&]", " ", firm) 
@@ -16,7 +20,7 @@ firm <- gsub("[^[:alnum:][:space:]&]", " ", firm)
 firm <- toupper(firm) 
 
 #input words to exclude "." means one letter.
-remove1 <- c("INC", "LTD", "LIMITED", "AG", "COMPANY", "PLC", "CO",
+remove1 <- c("INC", "LTD", "LIMITED", "AG", "COMPANY", "PLC","P L C", "CO",
   "CORPORATION", "SA", "S A", "N V", "PARTNERSHIP", "GROUP", "CORP", "THE", "HOLDINGS", "STORE", "STORES", "ALLIANCE", "ALLIANCES") 
 
 

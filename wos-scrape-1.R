@@ -20,16 +20,16 @@ source("set_selenium_chrome.R")
 
 #get base url
 baseurl <- remDr$getCurrentUrl()
-startloop <- 6
-
+##startloop <- 1
 
 ###Loop for seaching firm names
 stime <- Sys.time()
-source("search_and_download.R") 
+
+source("search_and_download_tryCatch.R") 
   
 etime <- Sys.time()
   
 ##send email  
-source("send_email.R")
+source("send_end_email.R")
 
-startloop <- i
+startloop <- i -1

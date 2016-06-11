@@ -15,8 +15,8 @@ remDr <- remoteDriver(remoteServerAddr = "localhost"
 remDr$open()
 
 ###timeout setting
-remDr$setTimeout(type = "page load", milliseconds = 60000)
-remDr$setTimeout(type = "implicit", milliseconds = 60000)
+remDr$setTimeout(type = "page load", milliseconds = 30000)
+remDr$setTimeout(type = "implicit", milliseconds = 30000)
 
 
 

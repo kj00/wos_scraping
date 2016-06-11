@@ -1,5 +1,5 @@
 ###prepare Rselenium drive
-library(Rselenium)
+library(RSelenium)
 
 startServer()
 remDr <- remoteDriver(remoteServerAddr = "localhost" 
@@ -10,8 +10,8 @@ remDr <- remoteDriver(remoteServerAddr = "localhost"
 
 remDr$open()
 
-remDr$setTimeout(type = "page load", milliseconds = 30000)
-remDr$setTimeout(type = "implicit", milliseconds = 30000)
+remDr$setTimeout(type = "page load", milliseconds = 60000)
+remDr$setTimeout(type = "implicit", milliseconds = 60000)
 
 
 #change download option---------------------

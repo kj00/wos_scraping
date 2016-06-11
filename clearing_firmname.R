@@ -4,7 +4,7 @@
 library(data.table)
 
 #read firm data from OSIRIS
-compname <- fread("compname.csv")
+compname <- fread("C:/Users/Koji/OneDrive/Research/wos_data/compname.csv")
 
 ## clean names
 firm <- compname[, c(2, 6, 3), with = F]

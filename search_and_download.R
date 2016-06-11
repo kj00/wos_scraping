@@ -7,17 +7,16 @@ library(stringr)
 dldirect <- "C:/Users/Koji/Downloads/"
 
 ##start loop
-for (i in startloop:length(firm)) {
+for (i in startloop:(length(firm)/2)) {
  
   ##return base url
   remDr$navigate(baseurl[[1]])
-  
+  baseurl <- remDr$getCurrentUrl()
   ## check search history is near 100. if so, delete history
   if (i / 99 - round(i / 99) == 0) {
-    
     webElem <- remDr$findElement(using="class", value = "bselsets")
     webElem$clickElement()
-    webElem <- remDr$findElement(using="xpath", "//*[@value='Delete selected sets']")
+    webElem <- remDr$findElement(using="xpath", "//*[@title='Delete selected sets']")
     webElem$clickElement()
     
     }
@@ -30,14 +29,14 @@ for (i in startloop:length(firm)) {
   
   if (fpname == "") {
   
-      search <- paste("(", fieldtag, "=", fname, "", ")", collapse = " or ", sep="")
+      search <- paste("(", fieldtag, "=", fname, "", ")", collapse = " or ", sep = "")
     
   } else {
   
       search <- paste(
-      paste("(", fieldtag, "=", fname, "", ")", collapse = " or ", sep=""),
+      paste("(", fieldtag, "=", fname, "", ")", collapse = " or ", sep = ""),
       " or ",
-      paste("(", fieldtag, "=", fpname, "", ")", collapse = " or ", sep="")
+      paste("(", fieldtag, "=", fpname, "", ")", collapse = " or ", sep = "")
         )
   
       }
@@ -52,7 +51,7 @@ for (i in startloop:length(firm)) {
   webElem$sendKeysToElement(list("All document types"))
   
   ##enter
-  webElem <- remDr$findElement(using = 'id', value="searchButton")
+  webElem <- remDr$findElement(using = "xpath", "//*[@title='Search']")
   webElem$clickElement()
   
   ##match current history 

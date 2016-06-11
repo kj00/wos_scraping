@@ -209,6 +209,7 @@ for (i in startloop:(length(firm) / 2)) {
         webElem = remDr$findElement(using = "class", value = "quickoutput-cancel-action")
         webElem$clickElement()
         
+        Sys.sleep(1)
         #-----------------------------------------------------------------------------------------------        
         
         error <- 1

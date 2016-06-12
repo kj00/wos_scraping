@@ -41,14 +41,14 @@ for (i in andredo) {  #startloop:(length(firm) / 2)
       
       if (fpname == "") {
         
-        search <- paste("(", fieldtag, "=" , fname, ")", collapse = " or ", sep = "")
+        search <- paste(fieldtag, "=" , "(", fname, ")", collapse = " or ", sep = "")
         
       } else {
         
         search <- paste(
-          paste("(", fieldtag, "=", fname, ")", collapse = " or ", sep = ""),
+          paste(fieldtag, "=", "(", fname, ")", collapse = " or ", sep = ""),
           " or ",
-          paste( "(", fieldtag, "=", fpname, ")", collapse = " or ", sep = "")
+          paste(fieldtag, "=", "(", fpname, ")", collapse = " or ", sep = "")
         )
         
       }
@@ -83,6 +83,16 @@ for (i in andredo) {  #startloop:(length(firm) / 2)
       histnum <- as.character(histable[3,1])# number of current search hist
       papernum <- as.numeric(gsub(",","", histable[3,2])) # number of papers hit
       histnum <- gsub("[^0-9]", "", histnum) 
+      
+      
+      ##if error happens, then selenium might start dl loop for previous search history.
+      ##so, if histnum_befor = histnum, send error enail and message.
+      if (histnum == histnum_before) {
+        
+        message("same hist number!")
+          source("send_caution_email.R")
+        
+      }
       
       
       #-----------------------------------------------------------------------------------------------      
@@ -223,5 +233,5 @@ for (i in andredo) {  #startloop:(length(firm) / 2)
   } # end loop for downloading
   
   #=====================  
-  
+  histnum_before <- histnum 
 } # end loop

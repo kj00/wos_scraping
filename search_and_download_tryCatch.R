@@ -7,7 +7,7 @@ library(stringr)
 dldirect <- "C:/Users/Koji/Downloads/"
 
 ##start loop
-for (i in startloop:(length(firm) / 2)) {
+for (i in andredo) {  #startloop:(length(firm) / 2)
   
   #-----------------------------------------------------------------------------------------------
   
@@ -34,21 +34,21 @@ for (i in startloop:(length(firm) / 2)) {
       }
       
       ##define search codes
-      fname <- firm[i, c(1)] #current firm name
-      fpname <- firm[i, c(2)] #previous firm name
+      fname <- firm_and[i, c(1)] #current firm name
+      fpname <- firm_and[i, c(2)] #previous firm name
       
       fieldtag <- c("OG", "OO", "FO")
       
       if (fpname == "") {
         
-        search <- paste("(", fieldtag, "=", fname, "", ")", collapse = " or ", sep = "")
+        search <- paste("(", fieldtag, "=" , fname, ")", collapse = " or ", sep = "")
         
       } else {
         
         search <- paste(
-          paste("(", fieldtag, "=", fname, "", ")", collapse = " or ", sep = ""),
+          paste("(", fieldtag, "=", fname, ")", collapse = " or ", sep = ""),
           " or ",
-          paste("(", fieldtag, "=", fpname, "", ")", collapse = " or ", sep = "")
+          paste( "(", fieldtag, "=", fpname, ")", collapse = " or ", sep = "")
         )
         
       }
@@ -81,7 +81,7 @@ for (i in startloop:(length(firm) / 2)) {
       histable <- webElem$getElementAttribute("outerHTML")[[1]] #get html of the table
       histable <- data.frame(readHTMLTable(htmlParse(histable))) #parse and read table
       histnum <- as.character(histable[3,1])# number of current search hist
-      papers_num <- as.numeric(gsub(",","", histable[3,2])) # number of papers hit
+      papernum <- as.numeric(gsub(",","", histable[3,2])) # number of papers hit
       histnum <- gsub("[^0-9]", "", histnum) 
       
       
@@ -105,7 +105,7 @@ for (i in startloop:(length(firm) / 2)) {
   
   #### if no paper is hit, go next.
   #=================================
-  if (papers_num == 0) {next}
+  if (papernum == 0) {next}
   #=================================  
   
   
@@ -129,6 +129,7 @@ for (i in startloop:(length(firm) / 2)) {
       webElem$clickElement()
       
       
+      
       #-----------------------------------------------------------------------------------------------
       error <- 1  
       
@@ -150,7 +151,7 @@ for (i in startloop:(length(firm) / 2)) {
   ##loop for downloading txt files
   
   #input number of downloads
-  num_dl<- ceiling(papers_num / 500)
+  num_dl<- ceiling(papernum / 500)
   
   
   for (j in 1:num_dl) {
@@ -180,7 +181,7 @@ for (i in startloop:(length(firm) / 2)) {
           webElem = remDr$findElement(using = "id", value = "markFrom")
           webElem$sendKeysToElement(list(paste(500 * j - 499)))
           webElem = remDr$findElement(using = "id", value = "markTo")
-          webElem$sendKeysToElement(list(paste(papers_num)))
+          webElem$sendKeysToElement(list(paste(papernum)))
           
         }
         

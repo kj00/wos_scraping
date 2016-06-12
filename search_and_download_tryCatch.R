@@ -7,7 +7,7 @@ library(stringr)
 dldirect <- "C:/Users/Koji/Downloads/"
 
 ##start loop
-for (i in andredo) {  #startloop:(length(firm) / 2)
+for (i in startloop:(length(firm) / 2)) {  #startloop:(length(firm) / 2)
   
   #-----------------------------------------------------------------------------------------------
   

@@ -28,7 +28,7 @@ remove1 <- c("INC", "LTD", "LIMITED", "AG", "A G", "COMPANY", "PLC","P L C", "CO
 firm <- gsub(paste("\\<", remove1, "\\>", sep = "", collapse = "|"), "", firm)
 
 #exclude space at the end of string
-firm <- gsub("\\s+$", "", firm)
+firm <- gsub("^\\s+|\\s+$", "", firm)
 
 #replace one or more spaces to one space
 firm <- gsub("\\s+", " ", firm)

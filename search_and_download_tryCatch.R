@@ -34,15 +34,15 @@ for (i in startloop:(length(firm) / 2)) {  #startloop:(length(firm) / 2)
       }
       
       ##define search codes
-      fname <- firm_and[i, c(1)] #current firm name
-      fpname <- firm_and[i, c(2)] #previous firm name
+      fname <- c(firm_same[i, c(1)], firm[i, c(1)]) #current firm name
+      fpname <- c(firm_same[i, c(2)], firm[i, c(2)]) #previous firm name
       
-      fieldtag <- c("OG", "OO", "FO")
+      fieldtag <- c("OO", "OG", "FO")  #order is crucial!!
       
-      if (fpname == "") {
+      
+      if (fpname[1] == "") {
         
-        search <- paste(fieldtag, "=" , "(", fname, ")", collapse = " or ", sep = "")
-        
+        search <- paste(fieldtag, "=" , "(", fname, ")", collapse = " or ", sep = "")    
       } else {
         
         search <- paste(

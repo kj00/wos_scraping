@@ -34,4 +34,4 @@ firm <- gsub("^\\s+|\\s+$", "", firm)
 firm <- gsub("\\s+", " ", firm)
 
 #for search, insert "and" in the space
-firm_and <- gsub(" ", " and ", firm)
+firm_same <- gsub(" ", " same ", firm)

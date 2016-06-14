@@ -5,15 +5,13 @@ library(data.table)
 
 #read firm data from OSIRIS
 osiris <- fread("C:/Users/Koji/OneDrive/Research/wos_data/osiris_withRD.csv")
-
-
-
+osiris <- osiris[order(rd_na)]
 
 ## clean names
-osiris <- (osiris[, 2:4, with = F])
-
-firm <- cbind(osiris[[2]], osiris[[3]])
-
+osiris <- osiris[, c(3:4), with = F]
+osiris[, order_na_id := 1:49057]
+firm <- cbind(osiris[[1]], osiris[[2]])
+  
 #exclude signs except "&"
 firm <- gsub("[^[:alnum:][:space:]]", " ", firm) 
 #make it capital

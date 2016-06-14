@@ -17,12 +17,13 @@ recipient <- "<kojih9@gmail.com>"  ## should be within Gmail
 
 ##set email body items
 progress <- i - startloop #number of firms done in the loop
-current_state <- (i * 100) / (length(firm) / 2)  #% of done
+current_state <- (i * 100) / length(firm[, 1])  #% of done
 rmin <- as.numeric(round((etime - stime) , 1)) #minites running
 fpermin <- progress / rmin  #prossessed number of firms in the loop
-remained <- (length(firm) / 2) - i  #remained number of firms
+remained <- length(firm[, 1]) - i  #remained number of firms
 rhour <- round(remained / fpermin * (1 / 60), 1)  #estimated processing hours
 rday <- round(rhour / 24, 1)  #estimated processing days
+  
 
 
 ##

@@ -18,8 +18,9 @@ firm <- gsub("[^[:alnum:][:space:]]", " ", firm)
 firm <- toupper(firm) 
 
 #input words to exclude "." means one letter.
-remove1 <- c("INC", "LTD", "LIMITED", "AG", "A G", "COMPANY", "PLC","P L C", "CO", "CV", "C V", "S A B", "DE", "D E", "AND", "OR",
-  "CORPORATION", "SA", "S A", "N V", "PARTNERSHIP", "GROUP", "CORP", "THE", "HOLDINGS","HOLDING", "STORE", "STORES", "ALLIANCE", "ALLIANCES") 
+remove1 <- c("INC", "LTD", "LIMITED", "AG", "A G", "COMPANY", "PLC","P L C", "CO", "CV", "C V", "S A B", "DE", "D E", "AND", "OR", "SPA", "S A P",
+  "AB", "A B", "PUBL", "ASA", "A S A" ,"AS", "A S",
+  "CORPORATION", "SA", "S A", "NV", "N V", "PARTNERSHIP", "GROUP", "CORP", "THE", "HOLDINGS","HOLDING", "STORE", "STORES", "ALLIANCE", "ALLIANCES") 
 
 
 #exclude words
@@ -33,3 +34,24 @@ firm <- gsub("\\s+", " ", firm)
 
 #for search, insert "and" in the space
 firm_same <- gsub(" ", " same ", firm)
+
+
+########
+firm <- as.data.frame(firm, stringsAsFactors = F)
+firm_same <- as.data.frame(firm_same, stringsAsFactors = F)
+
+firm$wdnum <- sapply(gregexpr("\\W+", firm[,1]), length)
+firm$ltnum <- sapply(firm[,1], nchar)
+firm$pwdnum <- sapply(gregexpr("\\W+", firm[,2]), length)
+firm$pltnum <- sapply(firm[,2], nchar)
+
+
+for(i in 1:nrow(firm))
+    if(firm$ltnum[i] < 2) {
+      firm$V1[i] <- osiris$`Company name`[i]
+      firm_same$V1[i] <- osiris$`Company name`[i]
+    }
+
+  
+c(24247, 29124, 36127, 39417) ## 0 letter
+c(1314, 1652, 17329, 25139, 29031) ## 1 letter

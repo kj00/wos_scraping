@@ -48,9 +48,9 @@ firm$pltnum <- sapply(firm[,2], nchar)
 
 for(i in 1:nrow(firm))
     if(firm$ltnum[i] < 2) {
-      firm$V1[i] <- osiris$`Company name`[i]
-      firm_same$V1[i] <- osiris$`Company name`[i]
-    }
+      firm$V1[i] <- gsub("[^[:alnum:][:space:]]", " ", osiris$`Company name`[i]) 
+      firm_same$V1[i] <- gsub("[^[:alnum:][:space:]]", " ", osiris$`Company name`[i])
+      }
 
   
 c(24247, 29124, 36127, 39417) ## 0 letter

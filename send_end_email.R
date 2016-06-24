@@ -30,6 +30,7 @@ rday <- round(rhour / 24, 1)  #estimated processing days
 mail_body <- paste(
   "current% is ", round(current_state,5), "%",
   " : stopped at firm num = ", i, 
+  " : number of files should be", num_dl,
   " : run = ", rmin, 
   " : num of progress = ", progress,
   " : firm per min = " , fpermin,

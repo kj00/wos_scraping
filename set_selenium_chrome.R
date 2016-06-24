@@ -20,7 +20,6 @@ remDr$setTimeout(type = "implicit", milliseconds = 30000)
 
 
 
-
 #change download option---------------------
 
 #getChromeProfile(getwd(), "profile1")
@@ -30,18 +29,51 @@ remDr$setTimeout(type = "implicit", milliseconds = 30000)
 #-------------------------------------------
 
 
+###
+if (outcampus == T) {
+  
+  
+  ###Out school log-in
+  remDr$navigate("http://ez.wul.waseda.ac.jp/login?url=http://www.wul.waseda.ac.jp/imas/index.html")
+  
+  webElem <- remDr$findElement(using = "xpath", "//*[@name='user']")
+  
+  webElem$sendKeysToElement(list("3215a0539"))
+  
+  webElem <- remDr$findElement(using = "xpath", "//*[@name='pass']")
+  
+  webElem$sendKeysToElement(list("hongkong"))
+  
+  
+  
+  webElem <- remDr$findElement(using = "xpath", "//*[@value='Login']")
+  webElem$clickElement()
+  
+  
+  remDr$navigate("http://webofknowledge.com.ez.wul.waseda.ac.jp/wos")
+  
+  
+  remDr$navigate("http://apps.webofknowledge.com.ez.wul.waseda.ac.jp/WOS_GeneralSearch_input.do?locale=en_US&errorKey=&viewType=input&SID=R2DgFEfIAfXIug9BrW8&product=WOS&search_mode=GeneralSearch&preferencesSaved=")
+  
+  currenturl <- remDr$getCurrentUrl()
+  
+  remDr$navigate(gsub("General", "Advanced", currenturl))
+  
+} else {
+  
+  #waseda log-in
+  remDr$navigate("http://www.wul.waseda.ac.jp/DOMEST/db_about/isi/wos.html")
+  
+  remDr$navigate("http://webofknowledge.com/wos")
+  
+  #Engilish version
+  remDr$navigate("http://apps.webofknowledge.com/WOS_GeneralSearch_input.do?locale=en_US&errorKey=&viewType=input&SID=Y2gEKlianVazzeDIpIM&product=WOS&search_mode=GeneralSearch&preferencesSaved=")
+  
+  #advanced search mode
+  remDr$navigate("http://apps.webofknowledge.com/WOS_AdvancedSearch_input.do?SID=Y2gEKlianVazzeDIpIM&product=WOS&search_mode=AdvancedSearch")
+  
+}
 
-##preparation
-#waseda log-in
-remDr$navigate("http://www.wul.waseda.ac.jp/DOMEST/db_about/isi/wos.html")
-
-remDr$navigate("http://webofknowledge.com/wos")
-
-#Engilish version
-remDr$navigate("http://apps.webofknowledge.com/WOS_GeneralSearch_input.do?locale=en_US&errorKey=&viewType=input&SID=Y2gEKlianVazzeDIpIM&product=WOS&search_mode=GeneralSearch&preferencesSaved=")
-
-#advanced search mode
-remDr$navigate("http://apps.webofknowledge.com/WOS_AdvancedSearch_input.do?SID=Y2gEKlianVazzeDIpIM&product=WOS&search_mode=AdvancedSearch")
 
 #login
 webElem <- remDr$findElement(using="id", value = "signin")

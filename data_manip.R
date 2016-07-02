@@ -1,5 +1,6 @@
 library(data.table)
 library(magrittr)
+library(stringr)
 source("C:/Users/Koji/OneDrive/GitHub/animal/byplot.R")
 
 
@@ -7,16 +8,17 @@ source("C:/Users/Koji/OneDrive/GitHub/animal/byplot.R")
 data <- fread("C:/Users/Koji/wos_data/wos_3_1.txt"
   , encoding = "UTF-8", sep = "\t", skip = 2, header = F, verbose = T, na.strings = "")
 
+#=================================================================================
+#for (i in 499:1){
+#test <- fread("C:/Users/Koji/wos_data/wos_3_1.txt"
+#  , encoding = "UTF-8", sep = "\t", header = F, 
+#  na.strings = "",skip = i,    verbose = T)
+#message(i)
+#}
 
-for (i in 499:1){
-test <- fread("C:/Users/Koji/wos_data/wos_3_1.txt"
-  , encoding = "UTF-8", sep = "\t", header = F, 
-  na.strings = "",skip = 103,    verbose = T)
-message(i)
-}
-
-read.table("C:/Users/Koji/wos_data/wos_3_1.txt", header = F
-  , skip = 3, sep = "\t", fill = F, quote = F)
+#read.table("C:/Users/Koji/wos_data/wos_3_1.txt", header = F
+# , skip = 3, sep = "\t", fill = F, quote = F)
+#================================================================================
 
 
 #V2:author names, V9:title, V10:journal name, V13:language, V14:doc type
@@ -31,7 +33,7 @@ drop_col = c(3:8, 11, 12, 15:22, 25:27,  29, 30, 33:35, 39:41, 44,  46:57, 60, 6
 new_colnames <- c("v1", "author", "title", "journal", "language"
   , "type", "author_address", "recipient", "funding", "citing"
   , "cited", "publisher", "pub_ad1", "pub_ad2", "jour_name2"
-  , "jour_name3", "year", "area", "wos_area", "wos_id")
+  , "jour_name3", "year", "area", "wos_area", "wos_id", "rn_id")
 
 
 
@@ -48,17 +50,30 @@ new_colnames <- c("v1", "author", "title", "journal", "language"
 
 ##loop to load all data
 data <- as.data.table(NULL)
-i <- 1
-for (i in 1841:length(file_list)) {
-  
+
+for (i in 1:3){#length(file_list)) {
   
   temp  <-  fread(paste("C:/Users/Koji/wos_data/", file_list[i, .], sep = "")
-  , drop = drop_col, sep = "\t", skip = 1)
-
-
+  , drop = drop_col, sep = "\t", skip = 1, na.strings = "")
 temp[, rn_id := file_list[i, id1]]
 data <- rbind(data, temp)
 (100 * i / length(file_list)) %>% round(1)  %>% message
  }
 
 colnames(data) <- new_colnames
+
+
+
+
+#################
+data[, `:=` (num_auth = str_count(author, ";") + 1
+           , num_add = str_count(author_address, "\\[.+?\\]")
+           , temp = str_extract_all(author_address, "(\\[.+?]).+?;|(\\[.+?]).+")
+   #, country = str_extract(author_address, "\\s*\\w*$") %>%
+   #                    gsub(" ", "", .) %>% 
+   #                    toupper
+            
+)]
+
+
+data[, temp]

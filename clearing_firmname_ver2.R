@@ -10,12 +10,14 @@ osiris <- fread("C:/Users/Koji/OneDrive/Research/wos_data/osiris_withRD.csv")
 osiris <- osiris[, c(1:4, 33), with = F]
 osiris <- osiris[order(rd_na)]
 osiris[, order_na_id := 1:49057]
+summary(osiris)
 #osiris[, rd_na := Reduce(`+`, lapply(.SD,function(x) is.na(x)))]
 #firm <- cbind(osiris[[1]], osiris[[2]])
 
 #exclude signs except "&"
-osiris[, .(firm_1, firm_2) := gsub("[^[:alnum:][:space:]]", " ", .SD)
-  , .SDcols = c("Company name", "Previous company name")] 
+out_cols <- c("Company name", "Previous company name")
+
+osiris[, outcols := lapply(.SD, function(x) gsub("[^[:alnum:][:space:]]", " ", x)), .SDcols = out_cols] 
 #firm <- gsub("[^[:alnum:][:space:]]", " ", firm) 
 
 #make it capital

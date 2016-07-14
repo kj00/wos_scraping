@@ -5,8 +5,8 @@ source("C:/Users/Koji/OneDrive/GitHub/animal/byplot.R")
 
 
 
-data <- fread("C:/Users/Koji/wos_data/wos_3_1.txt"
-  , encoding = "UTF-8", sep = "\t", skip = 2, header = F, verbose = T, na.strings = "")
+#data <- fread("C:/Users/Koji/wos_data/wos_3_1.txt"
+ # , encoding = "UTF-8", sep = "\t", skip = 2, header = F, verbose = T, na.strings = "")
 
 #=================================================================================
 #for (i in 499:1){
@@ -51,13 +51,13 @@ new_colnames <- c("v1", "author", "title", "journal", "language"
 ##loop to load all data
 data <- as.data.table(NULL)
 
-for (i in 1:3){#length(file_list)) {
+for (i in 1:10){  #length(file_list[, id1])) {
   
   temp  <-  fread(paste("C:/Users/Koji/wos_data/", file_list[i, .], sep = "")
   , drop = drop_col, sep = "\t", skip = 1, na.strings = "")
 temp[, rn_id := file_list[i, id1]]
 data <- rbind(data, temp)
-(100 * i / length(file_list)) %>% round(1)  %>% message
+(100 * i / length(file_list[,id1])) %>% round(1)  %>% message
  }
 
 colnames(data) <- new_colnames
@@ -66,14 +66,37 @@ colnames(data) <- new_colnames
 
 
 #################
-data[, `:=` (num_auth = str_count(author, ";") + 1
-           , num_add = str_count(author_address, "\\[.+?\\]")
-           , temp = str_extract_all(author_address, "(\\[.+?]).+?;|(\\[.+?]).+")
-   #, country = str_extract(author_address, "\\s*\\w*$") %>%
-   #                    gsub(" ", "", .) %>% 
-   #                    toupper
+data[, id := 1:nrow(data)]
+data[, `:=` (
+  
+             num_auth = str_count(author, ";") + 1 #count ; to make "number of authors"
+           , num_add = str_count(author_address, "\\[.+?\\]") %>% #extract number of []
+                       gsub("0" , "1", .) %>% as.numeric #if there is no [], then 1
+    
+           , temp = str_extract_all(author_address, "(\\[.+?]).+?;|(\\[.+?]).+") #extract each [] and following address
+              
+  )][
+    
+    temp == "character(0)", temp := author_address #if there is no [], insert original address
+    
+    ][, `:=` 
+    
+             (country = lapply(temp, 
+                                 function(x) str_extract(x, "\\s*\\w*$|\\s*\\w*;$") %>%
+                                           gsub(" |;", "", .) %>%
+                                           toupper 
+
+                                             )
+               
+  )][, num_country := lapply(country, 
+                               function(x) unique(x) %>% 
+                                             length) %>% 
+                      unlist
+               
+             ]
+
+data[,  univ := lapply(temp, function(x) grepl("Univ|univ", x) %>% sum) %>% as.numeric][
+  , num_add_univ := as.numeric(num_add) - as.numeric(univ)]
+
             
-)]
 
-
-data[, temp]

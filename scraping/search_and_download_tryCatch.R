@@ -90,7 +90,7 @@ for (i in startloop:(length(firm[,1]))) {  #startloop:(length(firm[,1]))
       if (histnum == histnum_before) {
         
         message("same hist number!")
-          source("send_caution_email.R")
+          source("scraping/send_caution_email.R")
         
       }
       
@@ -102,7 +102,7 @@ for (i in startloop:(length(firm[,1]))) {  #startloop:(length(firm[,1]))
     }, error = function(e) {
       
       message("error comes")
-      source("send_error_email.R")
+      source("scraping/send_error_email.R")
       remDr$refresh()
       
     }
@@ -146,7 +146,7 @@ for (i in startloop:(length(firm[,1]))) {  #startloop:(length(firm[,1]))
     }, error = function(e) {
       
       message("error comes")
-      source("send_error_email.R")
+      source("scraping/send_error_email.R")
       remDr$refresh()
       
     }
@@ -221,7 +221,7 @@ for (i in startloop:(length(firm[,1]))) {  #startloop:(length(firm[,1]))
       }, error = function(e) {
         
         message("error comes")
-        source("send_error_email.R")
+        source("scraping/send_error_email.R")
         remDr$refresh()
         
       }

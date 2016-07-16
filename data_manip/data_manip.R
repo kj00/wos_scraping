@@ -29,12 +29,14 @@ source("C:/Users/Koji/OneDrive/GitHub/animal/byplot.R")
 #V57:???, V58:research area, V59:wos research area, V60:wos id
 
 drop_col = c(3:8, 11, 12, 15:22, 25:27,  29, 30, 33:35, 39:41, 44,  46:57, 60, 62, 63)
+drop_col2 = c(1:44,  46:60, 62:63)
 
 new_colnames <- c("v1", "author", "title", "journal", "language"
   , "type", "author_address", "recipient", "funding", "citing"
   , "cited", "publisher", "pub_ad1", "pub_ad2", "jour_name2"
-  , "jour_name3", "year", "area", "wos_area", "wos_id", "rn_id")
+  , "jour_name3", "year", "area", "wos_area", "wos_id")
 
+new_colnames2 <- c("year", "wos_id")
 
 
 ##get file list and order by id
@@ -49,18 +51,47 @@ new_colnames <- c("v1", "author", "title", "journal", "language"
 
 
 ##loop to load all data
-data <- as.data.table(NULL)
-
-for (i in 1:10){  #length(file_list[, id1])) {
+wos_data <- as.data.table(NULL)
+prev_temp_store2 <- NULL
+for (i in 1:length(file_list[, id1])) {
   
-  temp  <-  fread(paste("C:/Users/Koji/wos_data/", file_list[i, .], sep = "")
-  , drop = drop_col, sep = "\t", skip = 1, na.strings = "")
-temp[, rn_id := file_list[i, id1]]
-data <- rbind(data, temp)
-(100 * i / length(file_list[,id1])) %>% round(1)  %>% message
- }
+  temp_store <- as.data.table(NULL)  
+  
+  for (j in 1:length(file_list[id1 == i, id1])) {
+    
+    file_name <- paste("C:/Users/Koji/wos_data/wos_", i, "_", j, ".txt", sep = "")
+    
+    if (file.exists(file_name)) {
+      
+      temp  <-  fread(file_name
+                      , drop = drop_col2, sep = "\t", skip = 1, na.strings = "")
+      
+      colnames(temp) <- new_colnames2
+      temp <- temp[, .(year, wos_id)] %>% as.data.table
+      
+      temp_store <- rbind(temp_store, temp)
+      
+    }
+  }
+  
+  if (identical(temp_store, as.data.table(NULL)) == FALSE) {
+  
+  temp_store2 <-  temp_store[, .N , by = year]
+  temp_store2[, rn_id := file_list[i, id1]]
 
-colnames(data) <- new_colnames
+  }
+  
+  if (identical(temp_store2, prev_temp_store2) == FALSE){
+  
+  wos_data <- rbind(wos_data, temp_store2)
+  
+  }
+  
+  prev_temp_store2 <- temp_store2
+  
+(100 * i / length(file_list[,id1])) %>% round(1)  %>% message
+  }
+
 
 
 

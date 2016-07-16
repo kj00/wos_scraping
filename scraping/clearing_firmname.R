@@ -4,7 +4,7 @@
 library(data.table)
 
 #read firm data from OSIRIS
-osiris <- fread("C:/Users/Koji/OneDrive/Research/wos_data/osiris_withRD.csv")
+osiris <- fread("C:/Users/Koji/Osiris/osiris_withRD.csv")
 osiris <- osiris[order(rd_na)]
 
 ## clean names

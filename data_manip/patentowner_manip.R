@@ -1,10 +1,7 @@
-library(ff)
-library(ffbase)
 library(data.table)
 library(magrittr)
 library(stringr)
 library(reshape2)
-options(fftempdir="C:/Users/Koji/ff_temp")
 
 
 
@@ -32,10 +29,11 @@ p <- fread("C:/Users/Koji/Orbis/patent.txt", stringsAsFactors = T
 
 #################
 osiris_patentid <- po_merged[, patentid] %>% as.data.table
-remove(osiris_patentid)
-remove(osiris_bvdid)
-remove(p)
-remove(po)
+
+#remove(osiris_patentid)
+#remove(osiris_bvdid)
+#remove(p)
+#remove(po)
 
 #===========
 p_merged <- merge(osiris_patentid, p

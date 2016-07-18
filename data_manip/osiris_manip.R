@@ -89,6 +89,29 @@ osiris_tasset_long[, tasset := gsub("\\(|\\)", "", tasset)][, tasset := as.numer
 
 remove(osiris_tasset)
 
+###fixed assets
+
+osiris_fasset1 <- fread("C:/Users/Koji/Osiris/Osiris_fixedasset_1_31250.csv", drop = 1:2)
+osiris_fasset2 <- fread("C:/Users/Koji/Osiris/Osiris_fixedasset_31251_end.csv", drop = 1:2)
+
+identical(colnames(osiris_fasset1),colnames(osiris_fasset2))
+
+osiris_fasset <- rbind(osiris_fasset1, osiris_fasset2)
+
+remove(osiris_fasset1, osiris_fasset2)
+
+colnames_osiris_fasset <- colnames(osiris_fasset)
+osiris_fasset_long <- melt(osiris_fasset,
+                           id.vars = colnames_osiris_fasset[1]
+                           , measure.vars = colnames_osiris_fasset[2:29]
+                           , variable.name = "year" 
+                           , value.name = "fasset")
+
+osiris_fasset_long[, year := str_extract(year, "....$")][order(`BvD ID number`, year)]
+osiris_fasset_long[, tasset := gsub("\\(|\\)", "", fasset)][, fasset := as.numeric(fasset)]
+
+remove(osiris_fasset)
+
 #######merge
 osiris <- merge(osiris_rd_long, osiris_sale_long
                 , by = c("BvD ID number", "year")
@@ -102,5 +125,10 @@ osiris <- merge(osiris, osiris_tasset_long
                 , by = c("BvD ID number", "year")
                 , all.x = TRUE)
 
-remove(osiris_tasset_long, osiris_emp_long, osiris_sale_long, osiris_rd_long)
+osiris <- merge(osiris, osiris_fasset_long
+                , by = c("BvD ID number", "year")
+                , all.x = TRUE)
+
+
+remove(osiris_tasset_long, osiris_emp_long, osiris_sale_long, osiris_rd_long, osiris_fasset_long)
 

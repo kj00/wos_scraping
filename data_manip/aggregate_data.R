@@ -50,23 +50,35 @@ data[order(order_na_id)][, unique(order_na_id) %>% length]
 
 data[is.na(coauthor), coauthor := 0]
 data[is.na(copatent), copatent := 0]
-data <- data[order_na_id < 956]
+
+####
+data <- data[order_na_id < 2599]
 data[, order_na_id %>% unique %>% length]
 
 ##
-#data2 <- data2[sale > 0][tasset >0][emp > 0]
+data <- data[sale > 0][tasset >0][emp > 0][rd > 0]
 
 ##
 data[, `:=` (lsale =log(sale)
-             , lrd = log(rd + 0.000001)
+             , lrd = log(rd)
              , lemp = log(emp)
              , ltasset = log(tasset))]
 
 data[, country := `Country
 code
 (incorp)`]
-data[, gis := as.factor(`GICS code`)]
 
+data[, gic := as.factor(`GICS code`)]
 
+data[, `Country
+code
+(incorp)` := NULL]
+data[, `GICS code` := NULL]             
+
+###
+data[, gic1 := str_extract(gic, "^......")]
+dataph<- data[gic == "20106020"]
 
 remove(wos_data, rdid_bvdid)
+
+

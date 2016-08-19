@@ -1,16 +1,28 @@
 library(data.table)
 library(stringr)
 library(magrittr)
-##R&D
-osiris_rd <- fread("C:/Users/Koji/Osiris/osiris_withRD.csv", drop = 1:2)
-osiris_rd <- osiris_rd[order(rd_na)]
-osiris_rd[, order_na_id := 1:49057]
-rdid_bvdid <- osiris_rd[, .(order_na_id, `BvD ID number`)]
+##R&D ID
+osiris_rd_id <- fread("C:/Users/Koji/Osiris/osiris_withRD.csv", drop = 1:2)
 
-colnames_osiris_rd<- colnames(osiris_rd)
+osiris_rd_id <- osiris_rd_id[order(rd_na)]
+osiris_rd_id[, order_na_id := 1:49057]
+rdid_bvdid <- osiris_rd_id[, .(order_na_id, `BvD ID number`)]
+remove(osiris_rd_id)
+
+
+##R&D
+osiris_rd1 <- fread("C:/Users/Koji/Osiris/Osiris_rd_1_31250.csv", drop = 1:2)
+osiris_rd2 <- fread("C:/Users/Koji/Osiris/Osiris_rd_31251_end.csv", drop = 1:2)
+
+identical(colnames(osiris_rd1),colnames(osiris_rd2))
+
+osiris_rd <- rbind(osiris_rd1, osiris_rd2)
+
+remove(osiris_rd1, osiris_rd2)
+colnames_osiris_rd <- colnames(osiris_rd)
 osiris_rd_long <- melt(osiris_rd,
-                    id.vars = colnames_osiris_rd[3]
-                    , measure.vars = colnames_osiris_rd[4:30]
+                    id.vars = colnames_osiris_rd[1]
+                    , measure.vars = colnames_osiris_rd[2:29]
                     , variable.name = "year"
                     , value.name = "rd")
 
@@ -108,7 +120,7 @@ osiris_fasset_long <- melt(osiris_fasset,
                            , value.name = "fasset")
 
 osiris_fasset_long[, year := str_extract(year, "....$")][order(`BvD ID number`, year)]
-osiris_fasset_long[, tasset := gsub("\\(|\\)", "", fasset)][, fasset := as.numeric(fasset)]
+osiris_fasset_long[, fasset := gsub("\\(|\\)", "", fasset)][, fasset := as.numeric(fasset)]
 
 remove(osiris_fasset)
 

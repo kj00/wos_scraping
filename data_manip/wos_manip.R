@@ -26,17 +26,17 @@ source("C:/Users/Koji/OneDrive/GitHub/animal/byplot.R")
 #V28:funding agency and id, V31:citing number, V32:cited number
 #V36:publisher, V37:publisher address1, V38:publisher address2, 
 #V42:journal name2, V43:journal name3, V45:published year, 
-#V57:???, V58:research area, V59:wos research area, V60:wos id
+#V57:???, V58:research area, V59:wos research area, V61:wos id
 
 drop_col = c(3:8, 11, 12, 15:22, 25:27,  29, 30, 33:35, 39:41, 44,  46:57, 60, 62, 63)
-drop_col2 = c(1:44,  46:60, 62:63)
+drop_col2 = c(1:13, 15:22, 24:44,  46:58, 60, 62:63)
 
 new_colnames <- c("v1", "author", "title", "journal", "language"
   , "type", "author_address", "recipient", "funding", "citing"
   , "cited", "publisher", "pub_ad1", "pub_ad2", "jour_name2"
   , "jour_name3", "year", "area", "wos_area", "wos_id")
 
-new_colnames2 <- c("year", "wos_id")
+new_colnames2 <- c("doc_type", "address", "year", "wos_area",  "wos_id", "num_add")
 
 
 ##get file list and order by id
@@ -68,10 +68,22 @@ for (i in 1:length(file_list[, id1])) {
       temp  <-  fread(file_name
                       , drop = drop_col2, sep = "\t", skip = 1, na.strings = "")
       
-      colnames(temp) <- new_colnames2
-      temp <- temp[, .(year, wos_id)] %>% as.data.table
+      temp[, num_add := str_count(V23, "\\[.+?\\]") %>% #extract number of []
+             gsub("0" , "1", .) %>% as.numeric]#if there is no [], then 1
       
-      temp_store <- rbind(temp_store, temp)
+      colnames(temp) <- new_colnames2
+      
+      
+      temp <- temp[num_add > 1][year > 1985][2016 > year][doc_type == "Article"][, .(year, wos_id)] %>%
+        as.data.table
+
+            
+      if(nrow(temp) == 0) { } else {
+      
+          temp_store <- rbind(temp_store, temp)
+        
+              } 
+      
       
     }
   }
@@ -83,7 +95,7 @@ for (i in 1:length(file_list[, id1])) {
 
   }
   
-  if (identical(temp_store2, prev_temp_store2) == FALSE){
+  if (identical(temp_store2, prev_temp_store2) == FALSE) {
   
   wos_data <- rbind(wos_data, temp_store2)
   
@@ -95,6 +107,7 @@ for (i in 1:length(file_list[, id1])) {
   }
 
 
+write.csv(wos_data, "C:/Users/Koji/wos.csv")
 
 
 

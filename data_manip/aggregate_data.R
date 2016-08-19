@@ -1,11 +1,10 @@
 source("data_manip/data_manip_env.R")
 source("data_manip/osiris_manip.R")
-source("data_manip/wos_manip.R")
+#source("data_manip/wos_manip.R")
 
 
 po_count <- fread("C:/Users/Koji/Orbis/copatent_osiris.csv", drop = 1)
-po_count[, copatent:= V1][, V1 := NULL]
-
+wos_data <- fread("C:/Users/Koji/wos.csv")
 
 data <- merge(osiris, po_count
               , by.x = c("BvD ID number", "year")
@@ -50,19 +49,19 @@ data[order(order_na_id)][, unique(order_na_id) %>% length]
 
 data[is.na(coauthor), coauthor := 0]
 data[is.na(copatent), copatent := 0]
-
+data[is.na(totalpatent), totalpatent := 0]
 ####
-data <- data[order_na_id < 2599]
+data <- data[order_na_id < 9012]
 data[, order_na_id %>% unique %>% length]
 
 ##
-data <- data[sale > 0][tasset >0][emp > 0][rd > 0]
+data <- data[sale > 0][tasset >0][emp > 0]
 
 ##
 data[, `:=` (lsale =log(sale)
              , lrd = log(rd)
              , lemp = log(emp)
-             , ltasset = log(tasset))]
+             , lfasset = log(fasset))]
 
 data[, country := `Country
 code
@@ -75,10 +74,48 @@ code
 (incorp)` := NULL]
 data[, `GICS code` := NULL]             
 
-###
-data[, gic1 := str_extract(gic, "^......")]
-dataph<- data[gic == "20106020"]
+###exclude Finaince, sales, and so on.
+data[, gic1 := str_extract(gic, "^..")]
+data[, gic2 := str_extract(gic, "^....")]
+data[, gic3 := str_extract(gic, "^......")]
+datagic <- data[gic1 != "30"][gic1 != "40"][
+  gic2 != "2520"][gic2 != "2530"][gic2 != "2540"][gic2 != "2550"]
 
-remove(wos_data, rdid_bvdid)
+
+remove(wos_data, rdid_bvdid, data)
 
 
+##dummy for 0 R&D, NA R&D
+datagic[lrd == -Inf, zero_rd_dum := 1]
+datagic[is.na(zero_rd_dum),  zero_rd_dum := 0]
+datagic[lrd == -Inf, lrd := 0]
+
+datagic[is.na(rd), na_rd_dum := 1]
+datagic[is.na(na_rd_dum), na_rd_dum := 0]
+
+###sum
+datagic[, num_year := length(year), by = `BvD ID number`]
+
+library(zoo)
+rollsumlist <- c("rd", "copatent", "coauthor")
+rollyear <- 3
+
+datagic[num_year > rollyear, paste("sum", rollyear, rollsumlist, sep = "_") := 
+          lapply(.SD, rollsum, k = rollyear, na.pad = TRUE),
+        by = `BvD ID number`, .SDcols = rollsumlist]
+
+
+##
+datagic[, rn_id := NULL][, V1 := NULL]
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  

@@ -6,26 +6,48 @@ library(pglm)
 library(mgcv)
 library(texreg)
 library(lmtest)
+library(sandwich)
 
 ###
 pdata <- plm.data(datagic, indexes = c("BvD ID number", "year"))
 
-datagam<-datagic[,
-                 .(lsale, copatent, coauthor, lrd, lemp, fasset, year, `BvD ID number`)] %>% 
-  na.omit %>% as.data.frame
+#datagam<-datagic[,
+#                 .(lsale, copatent, coauthor, lrd, lemp, fasset, year, `BvD ID number`)] %>% 
+#  na.omit %>% as.data.frame
 
-colnames(datagam)[8] <- "id"
+#colnames(datagam)[8] <- "id"
 
 
               
 ######
 pf_1 <- plm(lsale ~ lag(log(sum_3_copatent + 1), 2) + lag(log(sum_3_coauthor + 1), 2)
             + lag(lrd, 1)
+            + lemp + lfasset  + year
+            , data = pdata
+            , model = "within"
+)
+
+coeftest(pf_1, vcov =  pvcovHC(pf_1))
+
+pf_1 <- plm(lsale ~ lag(log(sum_5_copatent + 1), 4) + lag(log(sum_5_coauthor + 1), 4)
+            + lag(log(sum_5_rd + 0.000001), 4)
             + lemp + lfasset  + year + zero_rd_dum
             , data = pdata
-            , model = "fd"
+            , model = "within"
 )
-coeftest(pf_1, vcov =  vcovHC)
+
+coeftest(pf_1, vcov =  pvcovHC(pf_1))
+
+
+pf_1 <- plm(lsale ~ lag(log(cumsum_copatent + 1), 1) + lag(log(cumsum_coauthor + 1), 1)
+            + lag(log(cumsum_rd + 0.000001), 1)
+            + lemp + lfasset  + year + zero_rd_dum
+            , data = pdata
+            , model = "within"
+)
+
+coeftest(pf_1, vcov =  pvcovHC(pf_1))
+
 
 
 ######
@@ -33,14 +55,14 @@ coeftest(pf_1, vcov =  vcovHC)
 
 for (i in levels(pdata$gic3)) { 
   if (datagic[gic3 == i, sum(copatent)] > 0) {
-    pf_ind <- plm(lsale ~ lag(log(sum_3_copatent + 1), 2) + lag(log(sum_3_coauthor + 1), 2)
-                  + lag(lrd, 1)
+    pf_ind <- plm(lsale ~ lag(log(cumsum_copatent + 1), 1) + lag(log(cumsum_coauthor + 1), 1)
+                  
                   + lemp + lfasset  + year + zero_rd_dum
                   , data = subset(pdata, gic3 == i)
-                  , model = "fd"
+                  , model = "within"
     ) 
     
-    temp <- lmtest::coeftest(pf_ind, vcov = vcovHC)[1:5,]
+    temp <- lmtest::coeftest(pf_ind, vcov = pvcovHC)[1:6,]
     
     if (temp[2, 4] < 0.05) {
       
@@ -53,7 +75,7 @@ for (i in levels(pdata$gic3)) {
 }
 
 
-posi_gic3 <- c(101010, )
+posi_gic3 <- c(101010 )
 
 
 
@@ -67,9 +89,11 @@ for (i in levels(pdata$gic)) {
                   , model = "fd"
     ) 
     
-    temp <- lmtest::coeftest(pf_ind, vcov = vcovHC)[1:5,]
+      temp <- lmtest::coeftest(pf_ind, vcov = pvcovHC)[1:6,]  
     
-    if (temp[2, 4] < 0.05) {
+    
+    
+    if (temp[3, 4] < 0.05) {
       
       message(i)
       print(temp, digit = 3)
@@ -95,7 +119,7 @@ for (i in levels(pdata$posi_gic)) {
     
     temp <- lmtest::coeftest(pf_ind, vcov = vcovHC)[1:5,]
     
-    if (temp[2, 4] < 0.05) {
+    if (temp[3, 4] < 0.05) {
       
       message(i)
       print(temp, digit = 3)

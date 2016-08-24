@@ -93,16 +93,24 @@ datagic[lrd == -Inf, lrd := 0]
 datagic[is.na(rd), na_rd_dum := 1]
 datagic[is.na(na_rd_dum), na_rd_dum := 0]
 
-###sum
+###rollsum
 datagic[, num_year := length(year), by = `BvD ID number`]
 
 library(zoo)
-rollsumlist <- c("rd", "copatent", "coauthor")
-rollyear <- 3
+sumlist <- c("rd", "copatent", "coauthor", "totalpatent")
+rollyear <- 10
 
-datagic[num_year > rollyear, paste("sum", rollyear, rollsumlist, sep = "_") := 
-          lapply(.SD, rollsum, k = rollyear, na.pad = TRUE),
-        by = `BvD ID number`, .SDcols = rollsumlist]
+datagic[num_year > rollyear, paste("rollsum", rollyear, sumlist, sep = "_") := 
+          lapply(.SD, rollsum, k = rollyear, na.pad = F),
+        by = `BvD ID number`, .SDcols = umlist]
+
+
+###cumsum
+datagic[, paste("cumsum", sumlist, sep ="_") := 
+          lapply(.SD, cumsum),
+        by = `BvD ID number`, .SDcols = sumlist]
+
+
 
 
 ##

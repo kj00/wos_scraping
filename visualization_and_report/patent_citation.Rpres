@@ -1,0 +1,59 @@
+patent_citation
+========================================================
+author: 
+date: 
+autosize: true
+
+
+```{r setup, include=FALSE}
+source("vis_env.R")
+
+class_mean <- read_csv("C://Users/Koji/Orbis/patent_citation_mean.csv") %>% as.data.table
+
+
+section_titles <- c("Human Necessities", "Perofrming Operations; Transporting",
+                    "Chemistry; Merallurgy", "Textiles; Paper", "Fixed Constructions",
+                    "Mechanical Engineering", "Physics", "Electricity", 
+                    "other1", "other2", "other3", "other4")
+
+
+class_mean[, class := as.factor(class)]
+temp <- class_mean[, class]
+levels(temp) <- section_titles
+class_mean[, section := temp]
+remove(temp)
+
+```
+
+First Slide
+========================================================
+
+For more details on authoring R presentations please visit <https://support.rstudio.com/hc/en-us/articles/200486468>.
+
+- Bullet 1
+- Bullet 2
+- Bullet 3
+
+Slide With Code
+========================================================
+Time series of patent citation average by year
+
+```{r}
+p <- class_mean[class %in% LETTERS[1:8]] %>% ggplot(aes(pubyear, V1))
+
+p1<- p + geom_line(aes(colour = section)) +
+  ggthemes::scale_colour_tableau() +
+  ggthemes::theme_calc() + 
+  ylab("Average of # of Citation Recieved") + xlab("Publication Year")
+
+plotly::ggplotly(p1)
+
+```
+
+
+Slide With Plot
+========================================================
+
+```{r, echo=FALSE}
+plot(cars)
+```

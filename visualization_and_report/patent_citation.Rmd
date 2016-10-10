@@ -1,0 +1,53 @@
+---
+title: "Patent_citation"
+author: "Koji Higuchi"
+date: "October. 9th, 2016"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+source("vis_env.R")
+class_mean <- read_csv("C://Users/Koji/Orbis/patent_citation_mean.csv") %>% as.data.table
+
+
+section_titles <- c("Human Necessities", "Perofrming Operations; Transporting",
+                    "Chemistry; Merallurgy", "Textiles; Paper", "Fixed Constructions",
+                    "Mechanical Engineering", "Physics", "Electricity", 
+                    "other1", "other2", "other3", "other4")
+
+
+class_mean[, class := as.factor(class)]
+temp <- class_mean[, class]
+levels(temp) <- section_titles
+class_mean[, section := temp]
+remove(temp)
+
+
+```
+
+Average # of Citation Recieved by year
+
+```{r}
+p <- class_mean[class %in% LETTERS[1:8]] %>% ggplot(aes(pubyear, V1))
+
+p1<- p + geom_line(aes(colour = section)) +
+  ggthemes::scale_colour_tableau() +
+  ggthemes::theme_calc() + 
+  ylab("Average # of Citation Recieved") + xlab("Publication Year")
+
+plotly::ggplotly(p1)
+
+```
+
+
+Heatmap version
+```{r}
+library(d3heatmap)
+
+plot_d3h <- spread(class_mean, key = pubyear, value = V1) %>% as.data.frame
+
+d3heatmap(plot_d3h[-9:-12, -1:-2], Rowv = F, Colv = F, labRow = plot_d3h$section[-9:-12],
+          colors = "Blues")
+```
+

@@ -1,52 +1,189 @@
 source("data_manip/aggregate_data.R")
-
+source("analysis/func.R")
 ###
 library(plm)
 library(pglm)
 library(mgcv)
 library(texreg)
 library(lmtest)
-library(sandwich)
+library(sandwich
 
 ###
-pdata <- plm.data(datagic, indexes = c("BvD ID number", "year"))
+pdata <- plm.data(datagic[year < 2015], indexes = c("BvD ID number", "year"))
 
-#datagam<-datagic[,
-#                 .(lsale, copatent, coauthor, lrd, lemp, fasset, year, `BvD ID number`)] %>% 
+
+#datagam<-datagic %>% 
 #  na.omit %>% as.data.frame
-
+#datagam$id <- datagam$`BvD ID number`
 #colnames(datagam)[8] <- "id"
 
+###equations
+base_term <- "lemp + lfasset  + year + zero_rd_dum"
 
-              
+eq_roll_1 <-  lsale ~ lag(log(rollsum_3_copatent + 1), 5) +
+  lag(log(rollsum_3_totalpatent - rollsum_3_copatent + 1), 5) +
+  lag(log(rollsum_3_coauthor + 1), 5) +
+  lag(lrd, 1) +
+  lemp + lfasset  + year + zero_rd_dum
+
+eq_roll_2 <-  lsale ~ lag(log(rollsum_3_copatent + 1), 5) + lag(log(rollsum_3_coauthor + 1), 5)+
+  lag(lrd, 1) +lemp + lfasset  + year + zero_rd_dum
+
+
+
+
+eq_roll_1 <-  lsale ~ lag(log(rollsum_3_copatent_num_cited + 1), 3) +
+  lag(log(rollsum_3_total_num_cited - rollsum_3_copatent_num_cited + 1), 3) +
+  lag(log(rollsum_3_coauthor_num_cited + 1), 3) +
+  lag(log(rollsum_3_totalpaper_num_cited - rollsum_3_coauthor_num_cited + 1), 3) +
+  lemp + lfasset  + year + zero_rd_dum
+
+eq_roll_1 <- lsale ~ log(totalpatent_stock + 1) + 
+  lag(log(rollsum_3_copatent + 1), 3) +
+  lag(log(rollsum_3_coauthor + 1), 3) +
+  lemp + lfasset  + year 
+
+eq_roll_2 <-  lsale ~lag(log(rollsum_3_copatent_num_cited + 1), 3) +
+  lag(log(rollsum_3_coauthor_num_cited + 1), 3) + lag(lrd, 1) +
+  lemp + lfasset  + year + zero_rd_dum
+
+eq_roll_3 <-  lsale ~lag(log(rollsum_3_copatent + 1), 3) +
+  lag(log(rollsum_3_coauthor + 1), 3) +
+  lag(log(cumsum_total_num_cited + 1),1)  +
+  lemp + lfasset  + year + zero_rd_dum
+
+eq_roll_3 <-  lsale ~lag(log(rollsum_3_copatent + 1), 3) +
+    lag(log(rollsum_3_coauthor + 1), 3) +
+    lag(log(cumsum_total_num_cited + 1),1) + lag(log(cumsum_totalpaper_num_cited + 1), 1) +
+  lemp + lfasset  + year + zero_rd_dum
+
+eq_roll_3 <-  lsale ~lag(log(rollsum_3_copatent + 1), 3) +
+  lag(log(cumsum_total_num_cited + 1)) +
+  lemp + lfasset  + year + zero_rd_dum
+
+  eq_roll_4 <-  lsale ~lag(log(rollsum_3_copatent + 1), 3) +
+    lag(log(rollsum_3_coauthor + 1), 3) +
+    lag(log(cumsum_total_num_cited + 1),1) + lag(log(cumsum_totalpaper_num_cited + 1), 1) +
+    lag(log(cumsum_rd + 0.0001),1) +
+    lemp + lfasset  + year + zero_rd_dum
+  
+eq_roll_1 <-  lsale ~ lag(log(cumsum_total_num_cited +1),1) +
+  lag(log(cumsum_totalpaper_num_cited +1),1) +
+    lemp + lfasset  + year + zero_rd_dum
+  
+eq_roll_1 <-  log(cumsum_total_num_cited +1) ~ 
+  lag(log(cumsum_totalpaper_num_cited +1),1) +
+  lemp + lfasset  + year + zero_rd_dum
+
 ######
-pf_1 <- plm(lsale ~ lag(log(sum_3_copatent + 1), 2) + lag(log(sum_3_coauthor + 1), 2)
-            + lag(lrd, 1)
-            + lemp + lfasset  + year
-            , data = pdata
-            , model = "within"
+eq_roll_1 <-  lsale ~ lag(log(rollsum_3_copatent + 1), 5) +
+  lag(log(rollsum_3_totalpatent - rollsum_3_copatent + 1), 5) +
+  lag(log(rollsum_3_coauthor + 1), 5) +
+  lag(lrd, 1) +
+  lemp + lfasset  + year + zero_rd_dum
+
+eq_roll_2 <-  lsale ~ lag(log(rollsum_3_copatent + 1), 5) +
+  lag(log(rollsum_3_coauthor + 1), 5)+
+  lag(lrd, 1) +lemp + lfasset  + year + zero_rd_dum
+
+eq_roll_3 <- log(totalpatent + 1) ~ log(totalpaper + 1)  +
+  lag(lrd, 1) + lemp + lfasset + year + zero_rd_dum
+
+
+all1 <- pggls(eq_roll_1, model = "within",pdata)
+all2 <- pggls(eq_roll_2, model = "within",pdata)
+all3 <- pggls(eq_roll_3, model = "within",pdata)
+summary(all3)
+
+
+
+htmlreg(list(all1 %>% coeftest, all2 %>% coeftest, all3 %>% coeftest), file = "result1.doc", omit.coef = c("Inter.|year."),
+         digits = 5,
+        custom.coef.names = c("log rollsum3_copatent, lag2",
+                              "log rollsum3_totalpatent-copatent, lag2",
+                              "log rollsum3_coauthor lag2",
+                              "log R&D inv, lag1",
+                              "log employee",
+                              "log fixed asset",
+                              "log totalpaper",
+                              rep(NA, 26)),
+        custom.model.names = c("log sale", "log patent", "log patent"))
+
+gic_reg_list <- list()
+
+for (i in levels(pdata$gic3)) { 
+  
+    pf_ind <- plyr::failwith(NA,
+      pggls)(eq_roll_1, data = subset(pdata, gic3 == i) , model = "within")
+    
+    if(is.na(pf_ind) == F){
+      gic_reg_list[i] <- list(pf_ind %>% coeftest)
+          } 
+  
+  }
+}
+
+data.frame(gic3 = levels(pdata$gic3), name = )
+
+htmlreg(gic_reg_list, file = "result_gicnamed.html", omit.coef = "Inter.|year....",
+        custom.coef.names = c("log rollsum3_copatent, lag2",
+                              "log rollsum3_totalpatent-copatent, lag2",
+                              "log rollsum3_coauthor lag2",
+                              "log R&D inv, lag1",
+                              "log employee",
+                              "log fixed asset",
+                              rep(NA, 22)),
+        digits = 5,
+        custom.model.names = c("Energy Equipment & Services",
+                               "Oil, Gas & Consumable Fuels",
+                                "Chemicals",
+                                "Construction Materials",
+                                "Containers & Packaging",
+                                "Metals & Mining",
+                                "Paper & Forest Products",
+                                "Aerospace & Defense",
+                                "Building Products",
+                                "Construction & Engineering",
+                                "Electrical Equipment",
+                                "Industrial Conglomerates",
+                                "Machinery",
+                                "Trading Companies & Distribution",
+                                "Commercial Services & Supplies ",
+                                "Professional Services",
+                                "Air Freight & Logistics",
+                                "Airlines",
+                                "Marine",
+                                "Road & Rail",
+                                "Auto Components",
+                                "Automobiles",
+                                "Health Care Equipment & Supplies",
+                                "Health Care Provider & Services",
+                                "Biotechnology",
+                                "Pharmaceuticals",
+                                "Life Sciences Tools & Services",
+                                "Internet Software & Services",
+                                "IT Services",
+                                "Software",
+                                "Communication Equipment",
+                                "Computer & Peripherals",
+                                "Electronic Equipment & Instruments",
+                                "Semiconductors & Semiconductor Equipment",
+                                "Diversified Telecommunication Services",
+                                "Electric Utilities",
+                                "Multi-Utilities"),
+        custom.note = "dependent variable = log sale"
 )
-
-coeftest(pf_1, vcov =  pvcovHC(pf_1))
-
-pf_1 <- plm(lsale ~ lag(log(sum_5_copatent + 1), 4) + lag(log(sum_5_coauthor + 1), 4)
-            + lag(log(sum_5_rd + 0.000001), 4)
-            + lemp + lfasset  + year + zero_rd_dum
-            , data = pdata
-            , model = "within"
-)
-
-coeftest(pf_1, vcov =  pvcovHC(pf_1))
+                                
+                                
+                                
+                                
 
 
-pf_1 <- plm(lsale ~ lag(log(cumsum_copatent + 1), 1) + lag(log(cumsum_coauthor + 1), 1)
-            + lag(log(cumsum_rd + 0.000001), 1)
-            + lemp + lfasset  + year + zero_rd_dum
-            , data = pdata
-            , model = "within"
-)
 
-coeftest(pf_1, vcov =  pvcovHC(pf_1))
+
+
+###
+run_model(pdata, eq_roll_1)
 
 
 
@@ -55,21 +192,19 @@ coeftest(pf_1, vcov =  pvcovHC(pf_1))
 
 for (i in levels(pdata$gic3)) { 
   if (datagic[gic3 == i, sum(copatent)] > 0) {
-    pf_ind <- plm(lsale ~ lag(log(cumsum_copatent + 1), 1) + lag(log(cumsum_coauthor + 1), 1)
-                  
-                  + lemp + lfasset  + year + zero_rd_dum
+    pf_ind <- plm(eq_roll_1
                   , data = subset(pdata, gic3 == i)
                   , model = "within"
-    ) 
+                  ) 
     
     temp <- lmtest::coeftest(pf_ind, vcov = pvcovHC)[1:6,]
     
-    if (temp[2, 4] < 0.05) {
+ if (temp[3, 4] < 0.05) {
       
       message(i)
       print(temp, digit = 3)
       
-    }
+     }
     
   }
 }
@@ -82,23 +217,21 @@ posi_gic3 <- c(101010 )
 
 for (i in levels(pdata$gic)) { 
   if (datagic[gic == i, sum(copatent)] > 0) {
-    pf_ind <- plm(lsale ~ lag(log(sum_3_copatent + 1), 2) + lag(log(sum_3_coauthor + 1), 2)
-                  + lag(lrd, 1)
-                  + lemp + lfasset  + year + zero_rd_dum
+    pf_ind <- plm(eq_roll_1
                   , data = subset(pdata, gic == i)
-                  , model = "fd"
+                  , model = "within"
     ) 
     
       temp <- lmtest::coeftest(pf_ind, vcov = pvcovHC)[1:6,]  
     
     
     
-    if (temp[3, 4] < 0.05) {
+#    if (temp[3, 4] < 0.05) {
       
       message(i)
       print(temp, digit = 3)
       
-    }
+ #   }
     
   }
 }
@@ -119,12 +252,12 @@ for (i in levels(pdata$posi_gic)) {
     
     temp <- lmtest::coeftest(pf_ind, vcov = vcovHC)[1:5,]
     
-    if (temp[3, 4] < 0.05) {
+  #  if (temp[3, 4] < 0.05) {
       
       message(i)
       print(temp, digit = 3)
       
-    }
+   # }
     
   }
 }
@@ -134,17 +267,19 @@ for (i in levels(pdata$posi_gic)) {
 
 
 ####
-pf_np_1 <- gam(lsale ~ s(log(copatent + 1)) + s(log(coauthor + 1))
-          + lrd + lemp + log(1 + fasset)
+pf_np_1 <- gam(diff(lsale, 1) ~ s(diff(log(copatent + 1),1)) + s(diff(log(coauthor + 1), 1))
+          + lag(diff(lrd, 1), 1) + diff(lemp, 1) + diff(log(fasset + 0.0001),1)
+          + diff(zero_rd_dum, 1) + diff(factor(year), 1)
           , data = datagam)
-
-
+summary(pf_np_1)
+plot(pf_np_1)
 
 
 
 ###Knowledge Production Function
-kf_1 <- plm(log(totalpatent + 1) ~ log(sum_3_copatent + 1) %>% lag(2) +
-              log(sum_3_coauthor + 1) %>% lag(2) + lag(lrd, 1) + year
+kf_1 <- plm(log(totalpatent + 1) ~lag(log(cumsum_copatent_num_cited + 1), 1) 
+            + lag(log(cumsum_coauthor + 1), 1)
+            + lag(log(cumsum_total_num_cited - cumsum_copatent_num_cited + 1), 1) + year
              + zero_rd_dum
           , data = pdata
           , model = "within"
@@ -208,13 +343,15 @@ for (i in levels(pdata$gic)[49:80]) {
 
 
 m3 <- pgmm(lsale ~ lag(lsale, 1 )
-                 + lag(copatent ,1) + lag(coauthor, 1)
-                + lag(lrd, 1) + lemp + lfasset
-                  |lag(lrd, 3:99) + lag(lemp, 2:99) + lag(lfasset, 2:99) 
+                 + lag(rollsum_3_copatent ,3)
+                 + lag(rollsum_3_coauthor, 3)
+           + lemp + lfasset
+                  |lag(lrd,1) + lag(lemp, 2:99) + lag(lfasset, 2:99) 
            , effect = "twoway"
            , model = "onestep"
            , collapse = TRUE
            , data = pdata)
+summary(m3, robust = T)
 
 m33 <- pgmm(totalpatent ~ lag(totalpatent, 1 ) +
              lag(copatent, 1) + lag(coauthor, 1) +  lag(lrd, 1)

@@ -1,10 +1,10 @@
+##
 source("new_data_manip/9.R")
 source("analysis/func.R")
 
 ###
+library(tidyverse)
 library(plm)
-library(pglm)
-library(mgcv)
 library(texreg)
 library(lmtest)
 library(sandwich)
@@ -13,7 +13,8 @@ library(sandwich)
 pdata <- plm.data(datagic[1988 < year & year < 2016], indexes = c("bvdid", "year"))
 write_csv(pdata, "new_analysis/pdata.csv")
 
-###equations
+###make formulas
+#variable to formulas
 var2formula <- function(dependent_var, main_vars, control, dum = F) {
   
   paste0(c(main_vars, control), collapse = " + ") %>% 
@@ -22,10 +23,10 @@ var2formula <- function(dependent_var, main_vars, control, dum = F) {
   
 }
 
+#control variables
 control_vars <- c("lemp %>% lead(2)", "lfasset %>% lead(2)", "zero_rd_dum", "year", "gic1", "country")
 
-
-
+#main variables
 main_var_list <- list("ltotal_patent",
                           c("lcoauthor", "ltotal_patent"),
                           c("lnon_copatent", "lcopatent_nonuniv", "lcopatent_univ_involved"),
@@ -36,13 +37,14 @@ main_var_list <- list("ltotal_patent",
                           c("lcoauthor_num_cited", "lnon_copatent_wcite", "lnon_univ_copatent_wcite", "luniv_involved_copatent_wcite")
                           )
 
+#list of dummies
 dum_list <- lapply(main_var_list, function(x) {
   x %>% str_replace("^l", "") %>% paste0("zero_", ., "_dum")
 })
 
-main_var_list<- lapply(seq_along(dum_list), function(i) { c(main_var_list[i],  dum_list[i]) %>% unlist })
-formula_list <- lapply(main_var_list, function(x) {var2formula("lsale %>%  lead(2)", x, control_vars)})
-
+#
+main_var_list <- map(seq_along(dum_list), ~ c(main_var_list[.],  dum_list[.]) %>% unlist)
+formula_list <- map(main_var_list,~ var2formula("lsale %>%  lead(2)", ., control_vars))
 
 ###
 #r-squared for pggls object
@@ -57,14 +59,15 @@ numobs <- function(model) {
   model$model[[1]] %>% length
 }
 
-##
+##summary function
+#
 mysummary.plm <- function(x) {
-list(robust_coef = lmtest::coeftest(x, vcov = plm::pvcovHC(x)),
+list(robust_coef = lmtest::coeftest(x, vcov = plm::pvcovHC(x)), ###
      rsq = r.squared(x), num_obs = numobs(x))
 }
-
+#
 mysummary.pggls <- function(x) {
-  list(robust_coef = lmtest::coeftest(x),
+  list(robust_coef = lmtest::coeftest(x), ###for pggls, pvcovHC cannot be applied.
        rsq = rsq_pggls(x), num_obs = numobs(x))
 }
 
@@ -119,30 +122,3 @@ htmlreg(coef_list, omit.coef = "year|Inter|gic|country|dum",
         custom.note = note,
         digits = 3,
         file = "sale_results2_temp.doc")
-
-
-
-
-#custom.coef > omit.coef > reorder.coef
-screenreg(reg_results,
-
-          custom.coef.names = c("log coauthor + 1", "log total patent + 1",
-                                "log R&D inv, t-1", "log employee", "log fixed asset",
-                                "zero R&D dummy", "NA R&D dummy",
-                                rep(NA, 25),
-                               "log single patent + 1",
-                               "log non-university copatent + 1",
-                               "log university involved copatent + 1",
-                               "log copatent university + 1",
-                               "log copatent university and other + 1",
-                      "log coauthor citation + 1", "log total patent citation + 1",
-                      "log single patent citation + 1",
-                      "log non-university copatent citaiton + 1",
-                      "log university involved copatent citation + 1",
-                      "log university copatent copatent citation + 1",
-                      "log university and other copatent citation + 1"),
-          omit.coef = "year",
-          reorder.coef = c(1, 13, 2, 14 ,8:12, 15:19, 3:7),
-          custom.note = "Firm level FE and Year effects are included.  N = 14628,  Rsq; 0.51, 0.51, 0.51, 0.53, 0.53, 0.53")
-
-

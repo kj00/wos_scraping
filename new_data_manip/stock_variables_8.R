@@ -7,17 +7,17 @@ d <- read_csv("C://Users/Koji/Orbis/patent_final_aggregated.csv") %>%
 wos_data <- read_csv("C:/Users/Koji/wos.csv") %>% 
   as.data.table
 
-source("old_version_data_manip/osiris_manip.R") #for rbid_bvdid
+source("old_version_data_manip/osiris_manip.R") #for rdid_bvdid
 
 wos_data <- merge(wos_data, rdid_bvdid
                   , by.x = "rn_id"
                   , by.y = "order_na_id"
-                  , all.x = TRUE)
+                  , all.y = TRUE)
 
 d <- merge(d, wos_data,
            by.x = c("bvdid", "appyear"),
            by.y = c("BvD ID number", "year"),
-           all.x = T)
+           all =  T)
 
 
 osiris[, year := as.integer(year)]
@@ -30,13 +30,11 @@ remove(osiris, wos_data, rdid_bvdid)
 
 d[, year := appyear]
 d[, X1 := NULL][, appyear := NULL]
-d[,rn_id := NULL]
-
+d[,rn_id] %>% summary(na.rm = T)
 
 ###stock
 d[, year] %>% unique %>% .[order(.)]
 d <- d[!(year %in% c(9999, 1929:1960))]
-
 
 
 start_year <- 1961
@@ -50,13 +48,15 @@ dummy <- data.table(year = rep.int(start_year:end_year, data_len), #integer
  
 
 d <- merge(d, dummy, by = c("bvdid", "year"),
-              all.y = T)
-rm(dummy)
+              all = T)
+d[,uniqueN(rn_id)]
 
+rm(dummy)
 d <- d[order(bvdid, year)]
 
 #define investment variavles and corresponding stock variables
-inv_list <- d %>% colnames %>% .[3:18]
+inv_list <- d %>% colnames %>% .[c(3:10, 12:15)]
+
 stock_list <- inv_list %>% paste0("_stock")
 
 ##set zero for patent, coaurthor
@@ -80,18 +80,12 @@ stock_cal <- function(x, deprate) {
 }
 
 ##
-system.time(d[,  eval(stock_list) :=
+d[,  eval(stock_list) :=
                 lapply(.SD, function(x) stock_cal(x, 0.85)),
-              .SDcols = inv_list  ,by = bvdid])
-
-
-ggplot(d[1:((2014 - 1961 + 1) * 100), ]) +
-  geom_line(aes(year, total_patent, colour = bvdid)) 
-
-ggplot(d[1:((2014 - 1961 + 1) * 100), ]) +
-  geom_line(aes(year, total_patent_stock, colour = bvdid))
-
+              .SDcols = inv_list  ,by = bvdid]
+d[, uniqueN(rn_id)]
 
 ##
 write_csv(d, "C:/Users/Koji/Orbis/new1.csv")
+
 

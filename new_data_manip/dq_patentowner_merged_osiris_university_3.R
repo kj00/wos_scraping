@@ -1,4 +1,4 @@
-source("data_manip/data_manip_env.R")
+source("new_data_manip/data_manip_env.R")
 ##read osiris patent owner
 po_merged_osiris <-
   read_csv("C:/Users/Koji/Orbis/patentowner_merged_osiris.csv") %>% 

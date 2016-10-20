@@ -1,4 +1,4 @@
-source("data_manip/data_manip_env.R")
+source("new_data_manip/data_manip_env.R")
 
 po <- read_csv("C:/Users/Koji/Orbis/patentowner.txt",
                col_types = cols_only("patentid" = col_character(),
@@ -27,21 +27,21 @@ po_merged_osiris <- merge(po_merged_osiris, po,
                           by = "patentid",
                           all.x = T)
 remove(po)
+
+
 po_merged_osiris[, bvdid.y := NULL][, name.y := NULL]
 colnames(po_merged_osiris) <- c("patentid", "bvdid", "name")
 
-
 #count number of co-owner of each patent
-gc()
 po_merged_osiris[, num_coowner := uniqueN(name)  #bvdid can be deplicated for non firm owner 
                  , by = patentid]
 
-po_merged_osiris[, name := NULL]
+#dummy for university
+po_merged_osiris[, univ_dum := str_detect(name, regex("university", ignore_case = T)) %>% as.integer]
+
 
 write_csv(po_merged_osiris,
           "C:/Users/Koji/Orbis/patentowner_merged_osiris.csv")
-
-#po_merged_osiris[, num_coowner2 := uniqueN(bvdid), by = patentid]
 
 
 

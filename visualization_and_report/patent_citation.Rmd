@@ -6,7 +6,7 @@ output: html_document
 ---
 
 ```{r setup, include=FALSE}
-knitr::opts_chunk$set(echo = TRUE)
+knitr::opts_chunk$set(echo = F)
 source("vis_env.R")
 class_mean <- read_csv("C://Users/Koji/Orbis/patent_citation_mean.csv") %>% as.data.table
 
@@ -28,7 +28,7 @@ remove(temp)
 
 Average # of Citation Recieved by year
 
-```{r}
+```{r echo=F}
 p <- class_mean[class %in% LETTERS[1:8]] %>% ggplot(aes(pubyear, V1))
 
 p1<- p + geom_line(aes(colour = section)) +
@@ -42,7 +42,7 @@ plotly::ggplotly(p1)
 
 
 Heatmap version
-```{r}
+```{r echo=F}
 library(d3heatmap)
 
 plot_d3h <- spread(class_mean, key = pubyear, value = V1) %>% as.data.frame

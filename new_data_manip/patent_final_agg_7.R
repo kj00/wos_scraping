@@ -5,15 +5,18 @@ file_times <- c("from2005_tocurrent", "from1995_to2005", "from1985_to1995", "fro
 d <- as.data.table(NULL)
 
 ##looop
+
 for (i in 1:4) {
 
 temp <- read_csv(paste0("C://Users/Koji/Orbis/patent_new_aggregated",
                         file_times[i],
-                        ".csv")) %>% as.data.table
+                        ".csv")) %>% as.data.table %>% unique
 
 
-temp %<>% unique
-temp[is.na(Nofcited), Nofcited :=0]
+##count number of university owner by patent
+#takes time 
+temp[, num_coowner_univ := sum(univ_dum),
+                 by = patentid]
 
 
 ##copatent dummy 
@@ -42,36 +45,30 @@ temp[univ_other_copatent_dum + only_univ_copatent_dum + non_univ_copatent_dum ==
 
 ###
 
-dummy_names <- colnames(temp)[9:11]
+dummy_names <- colnames(temp)[8:10]
 
 for (j in dummy_names) {
   
-  var_names <- j %>% str_replace("dum$", c("cite", "wcite"))
+  var_name <- j %>% str_replace("dum$", "wcite")
   
   temp[get(j) == 1,
-       (var_names) := list(sum(Nofcited), sum(wNofcited)), 
+       (var_name) := sum(wNofcited), 
        by = c("bvdid", "appyear")]
   
-  temp[var_names[1] %>% get %>% is.na, var_names[1] := 0,
+  temp[var_name %>% get %>% is.na, var_name := 0,
        with = F]
-  temp[var_names[2] %>% get %>% is.na, var_names[2] := 0,
-       with = F]
-  
+
 }
 
 ###aggregate by bvdid and appyear
 temp <- temp[,
             .("total_patent" = uniqueN(patentid),
-         "total_patent_cite" = sum(Nofcited),
          "total_patent_wcite" = sum(wNofcited),
          "copatent_nonuniv" = sum(non_univ_copatent_dum),
          "copatent_univ" = sum(only_univ_copatent_dum),
          "copatent_univ_other" = sum(univ_other_copatent_dum),
-         non_univ_copatent_cite,
          non_univ_copatent_wcite,
-         only_univ_copatent_cite,
          only_univ_copatent_wcite,
-         univ_other_copatent_cite,
          univ_other_copatent_wcite
          ),
          by = c("bvdid", "appyear")][order(bvdid, -appyear)] %>% unique

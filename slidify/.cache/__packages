@@ -1,0 +1,7 @@
+base
+magrittr
+readr
+data.table
+tidyr
+ggplot2
+stringr

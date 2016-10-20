@@ -1,0 +1,74 @@
+---
+title       : 
+subtitle    : 
+author      : Koji Higuchi
+job         : Waseda University
+framework   : io2012        # {io2012, html5slides, shower, dzslides, ...}
+highlighter : hightlights.js  # {highlight.js, prettify, highlight}
+hitheme     : tomorrow      # 
+widgets     : []            # {mathjax, quiz, bootstrap}
+mode        : selfcontained # {standalone, draft}
+knit        : slidify::knit2slides
+---
+
+
+---
+## Review of my research
+#  Examine effect of innovation network on firm performance.
+
+
+
+
+---
+## Tips for Orbis
+
+1.  Converting application number to aplication year fail for some obs.
+    There are errors in app number data. but proportion is negligible.
+
+2. universities don't always have their own bvdid
+    Be careful to merge by bvdid
+
+
+
+
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = FALSE)
+library(magrittr)
+library(readr)
+library(data.table)
+library(tidyr)
+d <- read_csv("C://Users/Koji/Orbis/patent_final_aggregated.csv") %>% 
+  as.data.table
+
+d <- d[appyear != 9999]
+
+###
+d_agg <- d[, lapply(.SD, sum), by = appyear, .SDcols = colnames(d)[-1:-2]]
+d_agg[, non_copatent := total_patent - copatent_nonuniv - copatent_univ - copatent_univ_other]
+
+d_agg %<>% gather(key = appyear, value = sum) 
+colnames(d_agg)[2] <- "type"
+
+
+
+```
+
+---
+
+## Patent Count by Category
+```{r echo=FALSE, fig.align='center', results='asis'}
+library(ggplot2)
+library(stringr)
+g1<- ggplot(d_agg %>% dplyr::filter(!(str_detect(type,"wcite$|cite$|total_patent")))) +
+         geom_line(aes(appyear, sum, colour = reorder(type, -sum)), stat = "identity") +
+  ylab("# of patents") +
+  xlab("Application Year") +
+  theme_light() +
+  ggthemes::scale_colour_tableau(guide = guide_legend(title = "Category")) 
+
+plotly::ggplotly(g1) %>% htmlwidgets::saveWidget(file = "gply1.html")
+cat('<iframe src="gply1.html" width=100% height= 0.1% allowtransparency="true"> </iframe>')
+```
+
+

@@ -1,0 +1,102 @@
+---
+title: "Production Function Results"
+author: "Koji Higuchi"
+date: "2016年10月10日"
+output: html_document
+---
+
+##Dependent Variable = Log sale
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(tidyverse)
+library(plm)
+library(lmtest)
+library(sandwich)
+library(texreg)
+pdata <- readr::read_csv("pdata.csv") %>% plm.data(indexes = c("bvdid", "year"))
+```
+
+
+```{r include=F, cache=T}
+#regression1
+###equations
+eq1 <- lsale ~  log(coauthor_stock + 1) + log(total_patent_stock + 1) + 
+  lag(lrd, 1) + lemp + lfasset+ zero_rd_dum + na_rd_dum + year
+
+  
+eq2 <- lsale ~ log(coauthor_stock + 1) + log(non_copatent_stock + 1) + 
+  log(copatent_nonuniv_stock + 1) +
+  log(copatent_univ_stock + copatent_univ_other_stock + 1) +
+  lag(lrd, 1) + lemp + lfasset+ zero_rd_dum + na_rd_dum + year
+
+eq3 <- lsale ~  log(coauthor_stock + 1) + log(non_copatent_stock + 1) +
+  log(copatent_nonuniv_stock + 1) + log(copatent_univ_stock + 1) +
+  log(copatent_univ_other_stock + 1) +
+  lag(lrd, 1) + lemp + lfasset+ zero_rd_dum + na_rd_dum + year
+
+
+###
+p1 <- plm(eq1, model = "within", pdata) %>% coeftest(., vcov = pvcovHC(.))
+p2 <- plm(eq2, model = "within", pdata) %>% coeftest(., vcov = pvcovHC(.))
+p3 <- plm(eq3, model = "within", pdata) %>% coeftest(., vcov = pvcovHC(.))
+
+  
+###Citation
+eq1cite <- lsale ~  log(coauthor_num_cited_stock + 1) + log(total_patent_wcite_stock + 1) + 
+    lag(lrd, 1) + lemp + lfasset + zero_rd_dum + na_rd_dum + year 
+  
+  
+eq2cite <- lsale ~ log(coauthor_num_cited_stock + 1) + log(non_copatent_wcite_stock + 1) + 
+    log(non_univ_copatent_wcite_stock + 1) +
+    log(only_univ_copatent_wcite_stock + univ_other_copatent_wcite_stock + 1) +
+    lag(lrd, 1) + lemp + lfasset + zero_rd_dum + na_rd_dum + year
+  
+eq3cite <- lsale ~ log(coauthor_num_cited_stock + 1) +
+  log(non_copatent_wcite_stock + 1) + 
+  log(non_univ_copatent_wcite_stock + 1) +
+  log(only_univ_copatent_wcite_stock + 1) +
+  log(univ_other_copatent_wcite_stock + 1) +
+  lag(lrd, 1) + lemp + lfasset+ zero_rd_dum + na_rd_dum + year
+
+##
+###
+pc1 <- plm(eq1cite, model = "within", pdata) %>% coeftest(., pvcov = vcovHC(.))
+pc2 <- plm(eq2cite, model = "within", pdata) %>% coeftest(., pvcov = vcovHC(.))
+pc3 <- plm(eq3cite, model = "within", pdata) %>% coeftest(., pvcov = vcovHC(.))
+
+```
+
+
+```{r summary, echo=F, results="asis"}
+#custom.coef > omit.coef > reorder.coef
+htmlreg(list(p1, p2, p3, pc1, pc2, pc3),
+        star.symbol = "\\*", center = TRUE, doctype = FALSE, caption = "",
+          custom.coef.names = c("log coauthor + 1", "log total patent + 1",
+                                "log R&D inv, t-1", "log employee", "log fixed asset",
+                                "zero R&D dummy", "NA R&D dummy",
+                                rep(NA, 25),
+                               "log single patent + 1",
+                               "log non-university copatent + 1",
+                               "log university involved copatent + 1",
+                               "log copatent university + 1",
+                               "log copatent university and other + 1",
+                      "log coauthor citation + 1", "log total patent citation + 1",
+                      "log single patent citation + 1",
+                      "log non-university copatent citaiton + 1",
+                      "log university involved copatent citation + 1",
+                      "log university copatent copatent citation + 1",
+                      "log university and other copatent citation + 1"),
+          omit.coef = "year",
+          reorder.coef = c(1, 13, 2, 14 ,8:12, 15:19, 3:7),
+        custom.note = "Firm level FE and Year effects are included. with robust se.  N = 14628,  Rsq; 0.51, 0.51, 0.51, 0.53, 0.53, 0.53")
+```
+
+<br>
+<br>
+<br>
+
+
+```{r}
+summary(pdata)
+```
+

@@ -1,0 +1,99 @@
+---
+title: "Vis some variables"
+author: "Koji Higuchi"
+date: "2016年10月16日"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(tidyverse)
+library(ggplot2)
+library(data.table)
+library(magrittr)
+library(stringr)
+pdata <- readr::read_csv("pdata.csv", col_types = cols("gic1" = col_character())) %>% as.data.table
+
+
+```
+
+## R Markdown
+
+```{r count_plot, fig.align='center', echo = F, message=F}
+pdata$gic1 %<>% as.factor() 
+levels(pdata$gic1) <- c("Energy", "Materials", "Indutrials", "Consumer Discretionary", "Health Care", "IT", "Telecomunivation Services", "Utilities")
+
+pdata[, .(bvdid, gic1, country)] %>% unique %>% .[, .N, by = .(gic1, country)] %T>%
+{print(
+  ggplot(.) + geom_bar(aes(gic1, N, fill = gic1), stat = "identity") +
+    ggthemes::scale_fill_tableau() +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1, size = 10))
+  )} %T>% 
+{print(
+  ggplot(.) + geom_bar(aes(reorder(country, -N), N, fill = gic1), stat = "identity") +
+    ggthemes::scale_fill_tableau() +
+    theme(axis.text.x = element_text(angle = 45, hjust = 1, size = 10))
+  )} -> pd_ct
+
+
+
+```
+
+```{r heatmap, echo=FALSE, fig.align='center'}
+pd_ct[, .(gic1, country)] %>% unique %>% expand.grid %>% unique -> pd_ct_ex
+
+pd_ct %<>% merge(pd_ct_ex, ., by = c("gic1", "country"), all.x = T)
+pd_ct$N[is.na(pd_ct$N)] <- 0
+ 
+ggplot(pd_ct) +
+  geom_raster(aes(reorder(country, -N), reorder(gic1, -N), fill = log(N+1))) +
+  viridis::scale_fill_viridis() +
+   theme(axis.text.x = element_text(angle = 45, hjust = 1, size = 6))
+
+```
+
+
+## Including Plots
+_
+You can also embed plots, for example:
+
+```{r pressure, echo=FALSE, warning=F, message=FALSE,fig.align='center'}
+str_match_all(colnames(pdata), regex("bvdid|year|.+wcite_stock$|coauthor.+stock")) %>%
+  unlist %>% pdata[, ., with = F] %>% 
+  gather(name, value, -year) -> pd_var
+
+ggplot(pdata[zero_univ_involved_copatent_wcite_dum == 0],
+       aes(luniv_involved_copatent_wcite, lsale)) +
+  geom_point(aes(colour = year), position = "jitter") +
+  #geom_line(aes(group = bvdid, colour = year), alpha = 0.5) +
+  geom_smooth(method = "lm",  colour = "palegreen") +
+  xlab("log university copatent stock")
+
+ggplot(pdata[zero_univ_involved_copatent_wcite_dum == 0],
+       aes(luniv_involved_copatent_wcite, ltobin)) +
+  geom_point(aes(colour = year), position = "jitter") +
+  #geom_line(aes(group = bvdid, colour = year), alpha = 0.5) +
+  geom_smooth(method = "lm",  colour = "palegreen") +
+    xlab("log university copatent stock")
+
+  
+
+ggplot(pdata[zero_non_copatent_wcite_dum == 0],
+       aes(lnon_copatent_wcite, lsale)) +
+  geom_hex() +
+  geom_smooth(method = "lm",  colour = "palegreen") #+
+#  scale_colour_gradient2(low = "white", mid = "yellow", high = "red", midpoint = 2003)
+
+ggplot(pdata[zero_non_copatent_wcite_dum == 0],
+       aes(lnon_copatent_wcite, ltobin)) +
+  geom_hex() +
+  geom_smooth(method = "lm",  colour = "palegreen") #+
+
+```
+
+
+```{r}
+summary(pdata)
+```
+
+Note that the `echo = FALSE` parameter was added to the code chunk to prevent printing of the R code that generated the plot.

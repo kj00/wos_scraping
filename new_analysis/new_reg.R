@@ -98,7 +98,7 @@ stopCluster(cl)
 reg_results %<>% flatten()
 
 #
-coef_list <- map(reg_results, ~ .$robust_coef)
+coef_list <- map(reg_results, "robust_coef")
 glance_list <- map(reg_results, ~ c(round(.$rsq, 2), .$num_obs))
 
 #

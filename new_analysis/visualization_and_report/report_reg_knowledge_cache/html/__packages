@@ -1,0 +1,15 @@
+base
+RevoUtilsMath
+tidyverse
+ggplot2
+tibble
+tidyr
+readr
+purrr
+dplyr
+Formula
+plm
+zoo
+lmtest
+sandwich
+texreg

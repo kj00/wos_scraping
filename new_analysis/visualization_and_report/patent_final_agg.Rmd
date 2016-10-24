@@ -1,0 +1,79 @@
+---
+title: "One Owner vs. Copatent"
+author: "Koji Higuchi"
+date: ""
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = FALSE)
+source("vis_env.R")
+d <- read_csv("C://Users/Koji/Orbis/patent_final_aggregated.csv") %>% 
+  as.data.table
+
+d <- d[appyear != 9999]
+
+###
+d_agg <- d[, lapply(.SD, sum), by = appyear, .SDcols = colnames(d)[-1:-2]]
+d_agg[, non_copatent := total_patent - copatent_nonuniv - copatent_univ - copatent_univ_other]
+d_agg[, copatent_university := copatent_univ + copatent_univ_other]
+d_agg[, `:=` (copatent_univ = NULL,
+              copatent_univ_other = NULL)]
+
+d_agg %<>% gather(key = appyear, value = sum) 
+colnames(d_agg)[2] <- "type"
+
+
+
+```
+
+
+#Patent Count by Category
+```{r echo=FALSE}
+g1<- ggplot(d_agg %>% dplyr::filter(!(str_detect(type,"wcite$|cite$|total_patent")))) +
+         geom_line(aes(appyear, sum, colour = reorder(type, -sum)), stat = "identity") +
+  ylab("# of patents") +
+  xlab("Application Year") +
+  theme_light() +
+  ggthemes::scale_colour_tableau(guide = guide_legend(title = "Category")) 
+
+plotly::ggplotly(g1)
+```
+
+
+#Proportion
+```{r echo=FALSE}
+g2 <- ggplot(d_agg %>%
+         dplyr::filter(appyear %in% 1950:2015 & !(str_detect(type,"wcite$|cite$|total_patent")))) +
+         geom_bar(aes(appyear, sum, fill = reorder(type, -sum)), stat = "identity", position = "fill") +
+    ylab("") +
+  xlab("Application Year") +
+  theme_light() +
+  ggthemes::scale_fill_tableau(guide = guide_legend(title = "Category"))
+plotly::ggplotly(g2)
+```
+
+
+
+##Weighted Citation by Category
+```{r echo=FALSE}
+p <- ggplot(d_agg %>% dplyr::filter(appyear %in% 1950:2015 & str_detect(type,"wcite$")), aes(appyear, sum)) + 
+  xlab("Application Year") +
+  theme_light()
+  
+p1<- p + geom_line(aes(colour = reorder(type, -sum))) + 
+  ggthemes::scale_colour_tableau(guide = guide_legend(title = "Category")) +
+  ylab("Weighted Citation")
+
+plotly::ggplotly(p1)
+```
+
+
+#Proportion
+```{r warning=FALSE, echo=FALSE}
+p2 <- p + geom_bar(aes(fill = reorder(type, -sum)), position = "fill", stat = "identity") +
+  ggthemes::scale_fill_tableau(guide = guide_legend(title = "Category")) +
+  ylab("")
+
+plotly::ggplotly(p2)
+```

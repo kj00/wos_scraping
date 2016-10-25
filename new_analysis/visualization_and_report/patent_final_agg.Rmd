@@ -7,8 +7,13 @@ output: html_document
 
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = FALSE)
-source("vis_env.R")
-d <- read_csv("C://Users/Koji/Orbis/patent_final_aggregated.csv") %>% 
+
+#
+library(magrittr)
+library(tidyverse)
+library(data.table)
+
+d <- readr::read_csv("C://Users/Koji/Orbis/patent_final_aggregated.csv") %>% 
   as.data.table
 
 d <- d[appyear != 9999]
@@ -20,10 +25,9 @@ d_agg[, copatent_university := copatent_univ + copatent_univ_other]
 d_agg[, `:=` (copatent_univ = NULL,
               copatent_univ_other = NULL)]
 
-d_agg %<>% gather(key = appyear, value = sum) 
-colnames(d_agg)[2] <- "type"
+d_agg %<>% gather(type, sum, -appyear) 
 
-
+d_agg %>% head
 
 ```
 

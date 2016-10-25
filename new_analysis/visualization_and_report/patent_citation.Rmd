@@ -7,47 +7,47 @@ output: html_document
 
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = F)
-source("vis_env.R")
-class_mean <- read_csv("C://Users/Koji/Orbis/patent_citation_mean.csv") %>% as.data.table
 
+#
+library(magrittr)
+library(tidyverse)
+
+#
+class_mean <- readr::read_csv("C://Users/Koji/Orbis/patent_citation_mean.csv")
 
 section_titles <- c("Human Necessities", "Perofrming Operations; Transporting",
                     "Chemistry; Merallurgy", "Textiles; Paper", "Fixed Constructions",
-                    "Mechanical Engineering", "Physics", "Electricity", 
-                    "other1", "other2", "other3", "other4")
+                    "Mechanical Engineering", "Physics", "Electricity")
+            
+class_mean %<>%
+  filter(class %in% LETTERS[1:8]) %>% 
+  mutate(class = as.factor(class))
 
-
-class_mean[, class := as.factor(class)]
-temp <- class_mean[, class]
-levels(temp) <- section_titles
-class_mean[, section := temp]
-remove(temp)
-
+levels(class_mean$class) <- section_titles 
 
 ```
 
-Average # of Citation Recieved by year
+## Average # of Citation Recieved by year  
 
 ```{r echo=F}
-p <- class_mean[class %in% LETTERS[1:8]] %>% ggplot(aes(pubyear, V1))
-
-p1<- p + geom_line(aes(colour = section)) +
+class_mean %>% ggplot(aes(pubyear, V1)) +
+  geom_line(aes(colour = class)) +
   ggthemes::scale_colour_tableau() +
   ggthemes::theme_calc() + 
-  ylab("Average # of Citation Recieved") + xlab("Publication Year")
+  ylab("Average # of Citation Recieved") + xlab("Publication Year") -> p1
 
 plotly::ggplotly(p1)
 
 ```
+  
 
-
-Heatmap version
+## Heatmap version
 ```{r echo=F}
-library(d3heatmap)
 
-plot_d3h <- spread(class_mean, key = pubyear, value = V1) %>% as.data.frame
-
-d3heatmap(plot_d3h[-9:-12, -1:-2], Rowv = F, Colv = F, labRow = plot_d3h$section[-9:-12],
+class_mean %>%
+  arrange(desc(pubyear)) %>%
+  spread(pubyear, V1) %>%
+  select(-class) %>% 
+d3heatmap::d3heatmap(labRow = section_titles, Colv = F,
           colors = "Blues")
 ```
-

@@ -12,7 +12,7 @@ library(ggplot2)
 library(data.table)
 library(magrittr)
 library(stringr)
-pdata <- readr::read_csv("pdata.csv", col_types = cols("gic1" = col_character())) %>% as.data.table
+pdata <- readr::read_csv("C://Users/Koji/OneDrive/GitHub/wos_scraping/new_analysis/pdata.csv", col_types = cols("gic1" = col_character())) %>% as.data.table
 
 
 ```
@@ -92,8 +92,9 @@ ggplot(pdata[zero_non_copatent_wcite_dum == 0],
 ```
 
 
+## Summary Statistics
 ```{r}
-summary(pdata)
+summary(pdata) 
 ```
 
 Note that the `echo = FALSE` parameter was added to the code chunk to prevent printing of the R code that generated the plot.

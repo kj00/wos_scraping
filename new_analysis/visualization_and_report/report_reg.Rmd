@@ -5,7 +5,7 @@ date: "2016年10月10日"
 output: html_document
 ---
 
-##Dependent Variable = Log sale
+##Dependent Variable = Log sale  
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
 library(tidyverse)
